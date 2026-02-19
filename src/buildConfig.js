@@ -118,10 +118,10 @@ export default (config) => {
     color_thresholds_transition: 'smooth',
     line_width: 5,
     bar_spacing: 4,
-    compress: true,
     smoothing: true,
     state_map: [],
     cache: true,
+    cache_compress: true,
     value_factor: 0,
     tap_action: {
       action: 'more-info',
