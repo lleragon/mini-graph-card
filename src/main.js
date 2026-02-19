@@ -162,19 +162,6 @@ class MiniGraphCard extends LitElement {
     this.initial = false;
   }
 
-  updated(changedProperties) {
-    if (this.config.animate && changedProperties.has('line')) {
-      if (this.length.length < this.entity.length) {
-        this.shadowRoot.querySelectorAll('svg path.line').forEach((ele) => {
-          this.length[ele.id] = ele.getTotalLength();
-        });
-        this.length = [...this.length];
-      } else {
-        this.length = Array(this.entity.length).fill('none');
-      }
-    }
-  }
-
   render({ config } = this) {
     if (!config || !this.entity || !this._hass)
       return html``;
@@ -415,8 +402,8 @@ class MiniGraphCard extends LitElement {
       <mask id=${`fill-${this.id}-${i}`}>
         <path class='fill'
           type=${this.config.show.fill}
-          .id=${i} anim=${this.config.animate} ?init=${init}
-          style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+          .id=${i}
+          ?init=${init}
           fill='white'
           mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
           d=${this.fill[i]}
@@ -431,8 +418,7 @@ class MiniGraphCard extends LitElement {
       <path
         class='line'
         .id=${i}
-        anim=${this.config.animate} ?init=${this.length[i]}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+        ?init=${this.length[i]}
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
@@ -471,8 +457,6 @@ class MiniGraphCard extends LitElement {
         ?tooltip=${this.tooltip.entity === i}
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         ?init=${this.length[i]}
-        anim=${this.config.animate && this.config.show.points !== 'hover'}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
@@ -525,22 +509,15 @@ class MiniGraphCard extends LitElement {
   renderSvgBars(bars, index) {
     if (!bars) return;
     const items = bars.map((bar, i) => {
-      const animation = this.config.animate
-        ? svg`
-          <animate attributeName='y' from=${this.config.height} to=${bar.y} dur='1s' fill='remove'
-            calcMode='spline' keyTimes='0; 1' keySplines='0.215 0.61 0.355 1'>
-          </animate>`
-        : '';
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
           height=${bar.height} width=${bar.width} fill=${color}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => (this.tooltip = {})}>
-          ${animation}
         </rect>`;
     });
-    return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
+    return svg`<g class='bars'>${items}</g>`;
   }
 
   renderSvg() {

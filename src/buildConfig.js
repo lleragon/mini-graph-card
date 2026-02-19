@@ -106,7 +106,6 @@ export default (config) => {
     throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
 
   const conf = {
-    animate: false,
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,

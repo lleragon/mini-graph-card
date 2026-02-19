@@ -253,14 +253,14 @@ const style = css`
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .fill[anim="false"] {
+  .fill{
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .fill[anim="false"][type="fade"] {
+  .fill[type="fade"] {
     animation: reveal-2 .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .line--points[anim="false"],
-  .line[anim="false"] {
+  .line--points,
+  .line {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .line--points[inactive],
@@ -284,9 +284,6 @@ const style = css`
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
-  .bars[anim] {
-    animation: bars .5s cubic-bezier(0.215, 0.61, 0.355, 1);
-  }
   .bar {
     transition: opacity .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
@@ -301,18 +298,6 @@ const style = css`
   .line--points,
   .fill {
     opacity: 0;
-  }
-  .line--points[anim="true"][init] {
-    animation: pop .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-  }
-  .fill[anim="true"][init] {
-    animation: reveal .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-  }
-  .fill[anim="true"][init][type="fade"] {
-    animation: reveal-2 .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-  }
-  .line[anim="true"][init] {
-    animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .graph__labels.--secondary {
     right: 0;
