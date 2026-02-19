@@ -107,7 +107,6 @@ export default (config) => {
 
   const conf = {
     animate: false,
-    hour24: false,
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
@@ -152,7 +151,7 @@ export default (config) => {
     conf.color_thresholds_transition,
   );
   const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-  const hourFormat = conf.hour24 ? { hourCycle: 'h23' } : { hour12: true };
+  const hourFormat = { hourCycle: 'h23' };
   conf.format = { ...hourFormat, ...additional };
 
   // override points per hour to mach group_by function
