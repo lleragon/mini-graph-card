@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import { compress as lzStringCompress, decompress as lzStringDecompress } from '@kalkih/lz-string';
+import LZString from 'lz-string';
 
 const getMin = (arr, val) => arr.reduce((min, p) => (
   Number(p[val]) < Number(min[val]) ? p : min
@@ -13,9 +13,9 @@ const getMax = (arr, val) => arr.reduce((max, p) => (
 const getTime = (date, extra, locale = 'en-US') => date.toLocaleString(locale, { hour: 'numeric', minute: 'numeric', ...extra });
 const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
-const compress = data => lzStringCompress(JSON.stringify(data));
+const compress = data => LZString.compressToUint8Array(JSON.stringify(data));
 
-const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
+const decompress = data => (typeof data === 'string' ? JSON.parse(LZString.decompressFromUint8Array(data)) : data);
 
 const getFirstDefinedItem = (...collection) => collection.find(item => typeof item !== 'undefined');
 
