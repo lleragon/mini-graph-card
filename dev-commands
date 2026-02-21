@@ -1,0 +1,9 @@
+https://www.npmjs.com/package/npm-check-updates
+
+ncu -i
+
+npm install
+
+npm audit
+
+npm run build
