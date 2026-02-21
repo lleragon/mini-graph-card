@@ -94,7 +94,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
-| animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
+| ~~animate~~ | boolean |  | removed | ~~Add a reveal animation to the graph.~~
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
