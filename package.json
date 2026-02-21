@@ -1,6 +1,6 @@
 {
   "name": "mini-graph-card",
-  "version": "dev-1.0.0",
+  "version": "dev-1.0.1",
   "description": "A minimalistic and customizable graph card for Home Assistant Lovelace UI",
   "keywords": [
     "home-assistant",
@@ -35,6 +35,7 @@
     "@babel/plugin-transform-spread": "^7.28.6",
     "@babel/plugin-transform-template-literals": "^7.27.1",
     "@babel/preset-env": "^7.29.0",
+    "@biomejs/biome": "2.4.4",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -48,9 +49,6 @@
     "@types/spark-md5": "^3.0.5",
     "babel-plugin-iife-wrap": "^1.1.0",
     "babel-preset-minify": "^0.5.2",
-    "eslint": "^5.3.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.2",
     "rollup": "^4.58.0",
     "rollup-plugin-serve": "^3.0.0",
     "semantic-release": "^25.0.3"
@@ -59,7 +57,7 @@
     "build": "npm run lint && npm run rollup && npm run babel",
     "rollup": "rollup -c",
     "babel": "babel dist/mini-graph-card-bundle.js --out-file dist/mini-graph-card-bundle.js",
-    "lint": "eslint src/* --ext .js",
+    "lint": "npx @biomejs/biome check --write",
     "watch": "rollup -c --watch",
     "postversion": "npm run build"
   }
