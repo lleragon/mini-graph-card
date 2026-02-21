@@ -15,11 +15,11 @@
   ],
   "main": "src/main.js",
   "module": "src/main.js",
+  "type": "module",
   "repository": "git@github.com:kalkih/mini-graph-card.git",
   "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
   "license": "MIT",
   "dependencies": {
-
     "custom-card-helpers": "^2.0.0",
     "d3-interpolate": "^3.0.1",
     "lit-element": "^4.2.2",
