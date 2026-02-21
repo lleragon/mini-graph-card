@@ -69,10 +69,7 @@ export default class Graph {
 		if (!this._history) return;
 		this._updateEndTime();
 
-		const histGroups = this._history.reduce(
-			(res, item) => this._reducer(res, item),
-			[],
-		);
+		const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
 		// extend length to fill missing history
 		const requiredNumOfPoints = Math.ceil(this.hours * this.points);
@@ -117,18 +114,12 @@ export default class Graph {
 
 	_calcY(coords) {
 		// account for logarithmic graph
-		const max = this._logarithmic
-			? Math.log10(Math.max(1, this.max))
-			: this.max;
-		const min = this._logarithmic
-			? Math.log10(Math.max(1, this.min))
-			: this.min;
+		const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
+		const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
 
 		const yRatio = (max - min) / this.height || 1;
 		const coords2 = coords.map((coord) => {
-			const val = this._logarithmic
-				? Math.log10(Math.max(1, coord[V]))
-				: coord[V];
+			const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
 			const coordY = this.height - (val - min) / yRatio + this.margin[Y] * 2;
 			return [coord[X], coordY, coord[V]];
 		});
@@ -170,9 +161,7 @@ export default class Graph {
 
 		coords.forEach((point) => {
 			next = point;
-			Z = this._smoothing
-				? this._midPoint(last[X], last[Y], next[X], next[Y])
-				: next;
+			Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
 			path += ` ${Z[X]},${Z[Y]}`;
 			path += ` Q ${next[X]},${next[Y]}`;
 			last = next;
@@ -189,24 +178,17 @@ export default class Graph {
 		return thresholds.map((stop, index, arr) => {
 			let color;
 			if (stop.value > this._max && arr[index + 1]) {
-				const factor =
-					(this._max - arr[index + 1].value) /
-					(stop.value - arr[index + 1].value);
+				const factor = (this._max - arr[index + 1].value) / (stop.value - arr[index + 1].value);
 				color = interpolateRgb(arr[index + 1].color, stop.color)(factor);
 			} else if (stop.value < this._min && arr[index - 1]) {
-				const factor =
-					(arr[index - 1].value - this._min) /
-					(arr[index - 1].value - stop.value);
+				const factor = (arr[index - 1].value - this._min) / (arr[index - 1].value - stop.value);
 				color = interpolateRgb(arr[index - 1].color, stop.color)(factor);
 			}
 			let offset;
 			if (scale <= 0) {
 				offset = 0;
 			} else if (logarithmic) {
-				offset =
-					(Math.log10(Math.max(1, this._max)) -
-						Math.log10(Math.max(1, stop.value))) *
-					(100 / scale);
+				offset = (Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, stop.value))) * (100 / scale);
 			} else {
 				offset = (this._max - stop.value) * (100 / scale);
 			}
@@ -227,8 +209,7 @@ export default class Graph {
 
 	getBars(position, total, spacing = 4) {
 		const coords = this._calcY(this.coords);
-		const xRatio =
-			(this.width - spacing) / Math.ceil(this.hours * this.points) / total;
+		const xRatio = (this.width - spacing) / Math.ceil(this.hours * this.points) / total;
 		return coords.map((coord, i) => ({
 			x: xRatio * i * total + xRatio * position + spacing,
 			y: coord[Y],
@@ -245,20 +226,14 @@ export default class Graph {
 	}
 
 	_average(items) {
-		return (
-			items.reduce((sum, entry) => sum + parseFloat(entry.state), 0) /
-			items.length
-		);
+		return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0) / items.length;
 	}
 
 	_median(items) {
 		const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
 		const mid = Math.floor((itemsDup.length - 1) / 2);
 		if (itemsDup.length % 2 === 1) return parseFloat(itemsDup[mid].state);
-		return (
-			(parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) /
-			2
-		);
+		return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
 	}
 
 	_maximum(items) {

@@ -1,11 +1,4 @@
-import {
-	DEFAULT_COLORS,
-	DEFAULT_CONF,
-	DEFAULT_CONF_SHOW,
-	FONT_SIZE,
-	MAX_BARS,
-	URL_DOCS,
-} from "./const";
+import { DEFAULT_COLORS, DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS, URL_DOCS } from "./const";
 import { log } from "./utils";
 
 /**
@@ -52,9 +45,7 @@ const interpolateStops = (stops) => {
 		return stops;
 	}
 	if (stops[0].value == null || stops[stops.length - 1].value == null) {
-		throw new Error(
-			`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`,
-		);
+		throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
 	}
 
 	let leftValuedIndex = 0;
@@ -110,9 +101,7 @@ const computeThresholds = (stops, type) => {
 
 export default (config) => {
 	if (!Array.isArray(config.entities))
-		throw new Error(
-			`Please provide the "entities" option as a list.\n See ${URL_DOCS}`,
-		);
+		throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
 
 	const conf = {
 		...DEFAULT_CONF,
@@ -126,23 +115,16 @@ export default (config) => {
 
 	conf.state_map.forEach((state, i) => {
 		// convert string values to objects
-		if (typeof state === "string")
-			conf.state_map[i] = { value: state, label: state };
+		if (typeof state === "string") conf.state_map[i] = { value: state, label: state };
 		// make sure label is set
-		conf.state_map[i].label =
-			conf.state_map[i].label || conf.state_map[i].value;
+		conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
 	});
 
-	if (typeof config.line_color === "string")
-		conf.line_color = [config.line_color, ...DEFAULT_COLORS];
+	if (typeof config.line_color === "string") conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
 	conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
-	conf.color_thresholds = computeThresholds(
-		conf.color_thresholds,
-		conf.color_thresholds_transition,
-	);
-	const additional =
-		conf.hours_to_show > 24 ? { day: "numeric", weekday: "short" } : {};
+	conf.color_thresholds = computeThresholds(conf.color_thresholds, conf.color_thresholds_transition);
+	const additional = conf.hours_to_show > 24 ? { day: "numeric", weekday: "short" } : {};
 	const hourFormat = { hourCycle: "h23" };
 	conf.format = { ...hourFormat, ...additional };
 
@@ -162,9 +144,7 @@ export default (config) => {
 		const entities = conf.entities.length;
 		if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
 			conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
-			log(
-				`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`,
-			);
+			log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
 		}
 	}
 

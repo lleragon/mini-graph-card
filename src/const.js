@@ -1,5 +1,4 @@
-const URL_DOCS =
-	"https://github.com/lleragon/mini-graph-card/blob/master/README.md";
+const URL_DOCS = "https://github.com/lleragon/mini-graph-card/blob/master/README.md";
 const FONT_SIZE = 14;
 const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
@@ -32,16 +31,7 @@ const DEFAULT_COLORS = [
 	"#2980b9",
 	"#8e44ad",
 ];
-const UPDATE_PROPS = [
-	"entity",
-	"line",
-	"length",
-	"fill",
-	"points",
-	"tooltip",
-	"abs",
-	"config",
-];
+const UPDATE_PROPS = ["entity", "line", "length", "fill", "points", "tooltip", "abs", "config"];
 
 const DEFAULT_CONF = {
 	font_size: FONT_SIZE,
