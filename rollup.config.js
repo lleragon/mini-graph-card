@@ -4,6 +4,7 @@ import babel from '@rollup/plugin-babel';
 import serve from 'rollup-plugin-serve';
 import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
+import { literalsHtmlCssMinifier } from '@literals/rollup-plugin-html-css-minifier';
 
 const dev = process.env.ROLLUP_WATCH;
 const serveopts = {
@@ -17,6 +18,7 @@ const serveopts = {
 };
 
 const plugins = [
+    literalsHtmlCssMinifier(),
   nodeResolve({}),
   commonjs(),
   json(),
