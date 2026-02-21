@@ -22,10 +22,13 @@ const plugins = [
   nodeResolve({}),
   commonjs(),
   json(),
-  babel({exclude: 'node_modules/**'}),
+  babel({exclude: 'node_modules/**', babelHelpers: 'bundled' }),
   dev && serve(serveopts),
   !dev && terser({enclose: true, format: {comments: false, wrap_iife: true}}),
 ];
+
+// https://github.com/d3/d3-interpolate/issues/58
+const D3_WARNING = /Circular dependency.*d3-interpolate/
 
 export default [
   {
@@ -35,6 +38,9 @@ export default [
     format: 'umd',
     name: 'MiniGraphCard',
     sourcemap: dev ? true : false,
+  },
+  onwarn: function ( message ) {
+     if ( D3_WARNING.test(message) ) {return}
   },
     plugins: [...plugins],
   },
