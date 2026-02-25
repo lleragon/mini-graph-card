@@ -100,8 +100,7 @@ const computeThresholds = (stops, type) => {
 };
 
 export default (config) => {
-	if (!Array.isArray(config.entities))
-		throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
+	//if (!Array.isArray(config.entity)) throw new Error(`Please provide the "entity" option as a list.\n See ${URL_DOCS}`);
 
 	const conf = {
 		...DEFAULT_CONF,
@@ -109,9 +108,10 @@ export default (config) => {
 		show: { ...DEFAULT_CONF_SHOW, ...config.show },
 	};
 
-	conf.entities.forEach((entity, i) => {
-		if (typeof entity === "string") conf.entities[i] = { entity };
-	});
+	conf.entity = String(conf.entity);
+	//conf.entities.forEach((entity, i) => {
+	//		if (typeof entity === "string") conf.entities[i] = { entity };
+	//	});
 
 	conf.state_map.forEach((state, i) => {
 		// convert string values to objects
@@ -141,7 +141,8 @@ export default (config) => {
 	}
 
 	if (conf.show.graph === "bar") {
-		const entities = conf.entities.length;
+		//const entities = conf.entities.length;
+		const entities = 1;
 		if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
 			conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
 			log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);

@@ -1,0 +1,94 @@
+TO REMOVE
+    compareArray ?
+    style state--small
+
+    all legend
+    all Indicator
+
+    this.length = []; //Only used for animation, adapt dev branch?
+
+
+// biome-ignore format: reason
+
+
+FULL NEW CONFIG
+
+type: custom:extrema-graph-card
+entity:
+font_size: 14
+font_size_header: 14
+height: 100
+hours_to_show: 24
+points_per_hour: 0.5
+aggregate_func: "avg"
+group_by: "interval"
+//line_color: 
+//color_thresholds
+color_thresholds_transition: "smooth"
+line_width: 5
+bar_spacing: 4
+smoothing: true
+//state_map: 
+cache: true
+cache_compress: false
+value_factor: 0
+//tap_action:
+
+//missing in default config
+//align_icon:
+//align_state:
+//align_header:
+//icon:
+//icon_image:
+//name:
+//unit:
+//group:
+//update_interval:
+//decimals:
+//lower_bound:
+//upper_bound:
+//min_bound_range:
+//lower_bound_secondary:
+//upper_bound_secondary:
+//min_bound_range_secondary:
+//value_factor:
+//logarithmic:
+
+show:
+	name: true
+	icon: true
+	state: true
+	graph: "line"
+	fill: true
+	points: "hover"
+	legend: true       //REMOVED
+	extrema: false
+	labels: "hover"
+	labels_secondary: "hover"
+
+    //missing in default config
+    //average:false
+	//name_adaptive_color: false
+	//icon_adaptive_color: false
+	//loading_indicator: true
+
+
+
+entity (required) 	string 		Entity id of the sensor.
+    attribute 	string 		Retrieves an attribute or sub-attribute (attr1.attr2...) instead of the state
+    name 	string 		Set a custom display name, defaults to entity's friendly_name.
+    color 	string 		Set a custom color, overrides all other color options including thresholds.
+    unit 	string 		Set a custom unit of measurement, overrides unit set in base config ('' value for an empty unit).
+    aggregate_func 	string 		Override for aggregate function used to calculate point on the graph, avg, median, min, max, first, last, sum.
+    show_state 	boolean 		Display the current state.
+    show_legend_state 	boolean 	false 	Display the current state as part of the legend.
+    show_indicator 	boolean 		Display a color indicator next to the state.
+    show_graph 	boolean 		Set to false to completely hide the entity in the graph.
+    show_line 	boolean 		Set to false to hide the line.
+    show_fill 	boolean 		Set to false to hide the fill.
+    show_points 	boolean 		Set to false to hide the points.
+    show_legend 	boolean 		Set to false to turn hide from the legend.
+    state_adaptive_color 	boolean 		Make the color of the state adapt to the entity color.
+    y_axis 	string 		If 'secondary', displays using the secondary y-axis on the right.
+    fixed_value 	boolean 		Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
+    smoothing 	boolean 		Override for a flag indicating whether to make graph line smooth.

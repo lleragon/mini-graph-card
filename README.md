@@ -102,7 +102,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
 | decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for states.
-| hour24 | boolean | `false` | v0.2.1 | Set to `true` to display times in 24-hour format.
+| ~~hour24~~ | boolean | `false` | v0.2.1 | ~~Set to `true` to display times in 24-hour format.~~
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
 | font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.

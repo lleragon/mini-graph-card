@@ -39,7 +39,7 @@ class ExtremaGraphCard extends LitElement {
 		this.points = [];
 		this.gradient = {};
 		this.tooltip = {};
-		this.updateQueue = [];		//TODO
+		this.updateQueue = []; //TODO
 		this.updating = false;
 		this.stateChanged = false;
 		this.initial = true;
@@ -69,7 +69,7 @@ class ExtremaGraphCard extends LitElement {
 					this.initial ? 0 : 1000,
 				);
 			} else {
-			this.updateQueue = [...queue, ...this.updateQueue];
+				this.updateQueue = [...queue, ...this.updateQueue];
 			}
 		}
 	}
@@ -105,12 +105,12 @@ class ExtremaGraphCard extends LitElement {
 				[this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
 				this.config.hours_to_show,
 				this.config.points_per_hour,
-				this.config.entity.aggregate_func || this.config.aggregate_func,
+				this.config.aggregate_func,
 				this.config.group_by,
 				getFirstDefinedItem(
 					this.config.entity.smoothing,
 					this.config.smoothing,
-					!this.config.entity.entity.startsWith("binary_sensor."), // turn off for binary sensor by default
+					!this.config.entity.startsWith("binary_sensor."), // turn off for binary sensor by default
 				),
 				this.config.logarithmic,
 			);
@@ -264,7 +264,7 @@ class ExtremaGraphCard extends LitElement {
             ${this.computeState(value)}
           </span>
           <span class="state__uom ellipsis">
-            ${this.computeUom(entity)}
+            ${this.computeUom()}
           </span>
           ${this.renderStateTime()}
         </div>
@@ -589,7 +589,7 @@ class ExtremaGraphCard extends LitElement {
 		return this.config.icon || this.entity.attributes.icon || stateIcon(this.entity) || ICONS.temperature;
 	}
 
-	computeUom(index) {
+	computeUom() {
 		return this.config.entity.unit !== undefined
 			? this.config.entity.unit
 			: this.config.unit !== undefined
@@ -665,23 +665,23 @@ class ExtremaGraphCard extends LitElement {
 		if (config.show.graph) {
 			let graphPos = 0;
 
-				if (!this.entity || this.Graph.coords.length === 0) return;
-				const bound = config.entity.y_axis === "secondary" ? this.boundSecondary : this.bound;
-				[this.Graph.min, this.Graph.max] = [bound[0], bound[1]];
-				if (config.show.graph === "bar") {
-					const numVisible = 1
-					this.bar = this.Graph.getBars(graphPos, numVisible, config.bar_spacing);
-					graphPos += 1;
-				} else {
-					const line = this.Graph.getPath();
-					if (config.entity.show_line !== false) this.line = line;
-					if (config.show.fill && config.entity.show_fill !== false) this.fill = this.Graph.getFill(line);
-					if (config.show.points && config.entity.show_points !== false) {
-						this.points = this.Graph.getPoints();
-					}
-					if (config.color_thresholds.length > 0 && !config.entity.color)
-						this.gradient = this.Graph.computeGradient(config.color_thresholds, this.config.logarithmic);
+			if (!this.entity || this.Graph.coords.length === 0) return;
+			const bound = config.entity.y_axis === "secondary" ? this.boundSecondary : this.bound;
+			[this.Graph.min, this.Graph.max] = [bound[0], bound[1]];
+			if (config.show.graph === "bar") {
+				const numVisible = 1;
+				this.bar = this.Graph.getBars(graphPos, numVisible, config.bar_spacing);
+				graphPos += 1;
+			} else {
+				const line = this.Graph.getPath();
+				if (config.entity.show_line !== false) this.line = line;
+				if (config.show.fill && config.entity.show_fill !== false) this.fill = this.Graph.getFill(line);
+				if (config.show.points && config.entity.show_points !== false) {
+					this.points = this.Graph.getPoints();
 				}
+				if (config.color_thresholds.length > 0 && !config.entity.color)
+					this.gradient = this.Graph.computeGradient(config.color_thresholds, this.config.logarithmic);
+			}
 			this.line = [...this.line];
 		}
 		this.updating = false;
@@ -761,7 +761,7 @@ class ExtremaGraphCard extends LitElement {
 			? localForage.setItem(`${key}_${this._md5Config}`, compress(data))
 			: localForage.setItem(`${key}_${this._md5Config}_raw`, data);
 	}
-	
+
 	async updateEntity(initStart, end) {
 		if (
 			!this.entity ||
@@ -867,7 +867,7 @@ class ExtremaGraphCard extends LitElement {
 			this.Graph.history = stateHistory;
 		}
 	}
-	
+
 	async fetchRecent(entityId, start, end, skipInitialState, withAttributes) {
 		let url = "history/period";
 		if (start) url += `/${start.toISOString()}`;
