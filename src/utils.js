@@ -16,7 +16,7 @@ const getFirstDefinedItem = (...collection) => collection.find((item) => typeof 
 const compareArray = (a, b) => a.length === b.length && a.every((value, index) => value === b[index]);
 
 const log = (message) => {
-	console.warn("mini-graph-card: ", message);
+	console.warn("extrema-graph-card: ", message);
 };
 
 export { getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log, getFirstDefinedItem, compareArray };

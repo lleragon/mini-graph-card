@@ -24,7 +24,7 @@ import {
 	log,
 } from "./utils";
 
-class MiniGraphCard extends LitElement {
+class ExtremaGraphCard extends LitElement {
 	constructor() {
 		super();
 		this.id = Math.random().toString(36).substr(2, 9);
@@ -171,7 +171,7 @@ class MiniGraphCard extends LitElement {
 	renderWarnings() {
 		return html`
 			<hui-warning>
-				<div>mini-graph-card</div>    
+				<div>extrema-graph-card</div>    
 				<div>
 					Entity not available: ${this.config.entity}
 				</div>
@@ -950,13 +950,13 @@ class MiniGraphCard extends LitElement {
 	}
 }
 
-customElements.define("mini-graph-card", MiniGraphCard);
+customElements.define("extrema-graph-card", ExtremaGraphCard);
 
 // Configure the preview in the Lovelace card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
-	type: "mini-graph-card",
-	name: "Mini Graph Card",
+	type: "extrema-graph-card",
+	name: "Extrema Graph Card",
 	preview: false,
-	description: "The Mini Graph card is a minimalistic and customizable graph card",
+	description: "TODO",
 });

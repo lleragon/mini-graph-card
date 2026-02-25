@@ -3,10 +3,10 @@ import { version } from "../package.json";
 import { decompress } from "./utils";
 
 localForage.config({
-	name: "mini-graph-card",
+	name: "extrema-graph-card",
 	version: 1.0,
 	storeName: "entity_history_cache",
-	description: "Mini graph card uses caching for the entity history",
+	description: "Extrema graph card uses caching for the entity history",
 });
 
 localForage
@@ -23,7 +23,7 @@ localForage
 	});
 
 console.info(
-	`%c MINI-GRAPH-CARD %c ${version} `,
+	`%c EXTREMA-GRAPH-CARD %c ${version} `,
 	"color: white; background: coral; font-weight: 700;",
 	"color: coral; background: white; font-weight: 700;",
 );
