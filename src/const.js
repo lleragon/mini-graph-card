@@ -64,7 +64,7 @@ const DEFAULT_CONF_SHOW = {
 	labels: "hover",
 	labels_secondary: "hover",
 	extrema: false,
-	legend: true,
+	//TODO	legend: true,
 	fill: true,
 	points: "hover",
 };
