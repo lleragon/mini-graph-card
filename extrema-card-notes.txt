@@ -22,13 +22,13 @@ hours_to_show: 24
 points_per_hour: 0.5
 aggregate_func: "avg"
 group_by: "interval"
-//line_color: 
+//line_color:
 //color_thresholds
 color_thresholds_transition: "smooth"
 line_width: 5
 bar_spacing: 4
 smoothing: true
-//state_map: 
+//state_map:
 cache: true
 cache_compress: false
 value_factor: 0
@@ -55,22 +55,22 @@ value_factor: 0
 //logarithmic:
 
 show:
-	name: true
-	icon: true
-	state: true
-	graph: "line"
-	fill: true
-	points: "hover"
-	legend: true       //REMOVED
-	extrema: false
-	labels: "hover"
-	labels_secondary: "hover"
+   name: true
+    icon: true
+    state: true
+    graph: "line"
+    fill: true
+    points: "hover"
+    legend: true       //REMOVED
+    extrema: false
+    labels: "hover"
+    labels_secondary: "hover"
 
     //missing in default config
     //average:false
-	//name_adaptive_color: false
-	//icon_adaptive_color: false
-	//loading_indicator: true
+    //name_adaptive_color: false
+    //icon_adaptive_color: false
+    //loading_indicator: true
 
 
 
