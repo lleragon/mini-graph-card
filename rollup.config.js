@@ -37,7 +37,7 @@ export default [
             file: 'dist/extrema-graph-card-bundle.js',
             format: 'umd',
             name: 'ExtremaGraphCard',
-            sourcemap: dev ? true : false,
+            sourcemap: !!dev,
         },
         onwarn: function (message) {
             if (D3_WARNING.test(message)) {}
