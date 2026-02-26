@@ -8,6 +8,10 @@
     ]
   ],
   "comments": false,
+  "exclude": [
+    "node_modules/**",
+    "dist/**"
+  ],
   "plugins": [
     [
       "@babel/plugin-proposal-decorators",
