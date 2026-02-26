@@ -6,11 +6,11 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["src/**", "!!**/dist"]
+		"includes": ["src/**"]
 	},
 	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
+		"enabled": false,
+		"indentStyle": "space",
 		"lineWidth": 120
 	},
 	"linter": {
