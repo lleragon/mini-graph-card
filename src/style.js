@@ -34,15 +34,8 @@ const style = css`
         animation: none;
     }
 
-    ha-card[labels-secondary] .graph__labels.--secondary {
-        opacity: 0;
-        transition: opacity .25s;
-        animation: none;
-    }
-
     ha-card[points]:hover .line--points,
-    ha-card:hover .graph__labels.--primary,
-    ha-card:hover .graph__labels.--secondary {
+    ha-card:hover .graph__labels.--primary {
         opacity: 1;
     }
 
@@ -149,19 +142,6 @@ const style = css`
         order: 2;
     }
 
-    .states[loc="center"] .states--secondary,
-    .states[loc="right"] .states--secondary {
-        margin-left: 0;
-    }
-
-    .states[loc="center"] .states--secondary {
-        align-items: center;
-    }
-
-    .states[loc="right"] .states--secondary {
-        align-items: flex-start;
-    }
-
     .states[loc="center"] .state__time {
         left: 50%;
         transform: translateX(-50%);
@@ -170,20 +150,6 @@ const style = css`
     .states > .icon > ha-icon {
         height: 2em !important;
         width: 2em !important;
-    }
-
-    .states--secondary {
-        display: flex;
-        flex-flow: column;
-        flex-wrap: wrap;
-        align-items: flex-end;
-        margin-left: 1rem;
-        min-width: 0;
-        margin-left: 1.4em;
-    }
-
-    .states--secondary:empty {
-        display: none;
     }
 
     .state {
@@ -197,15 +163,6 @@ const style = css`
     .state > svg {
         align-self: center;
         border-radius: 100%;
-    }
-
-    .states--secondary > :only-child {
-        font-size: 1em;
-        margin-bottom: 0;
-    }
-
-    .states--secondary > :only-child svg {
-        display: none;
     }
 
     .state__value {
@@ -331,11 +288,6 @@ const style = css`
         opacity: 0;
     }
 
-    .graph__labels.--secondary {
-        right: 0;
-        margin-right: 0px;
-        align-items: flex-end;
-    }
 
     .graph__labels {
         align-items: flex-start;

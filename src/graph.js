@@ -24,7 +24,7 @@ export default class Graph {
             delta: this._delta,
             diff: this._diff,
         };
-
+        
         this._history = undefined;
         this.coords = [];
         this.width = width - margin[X] * 2;
@@ -41,45 +41,45 @@ export default class Graph {
         this._groupBy = groupBy;
         this._endTime = 0;
     }
-
+    
     get max() {
         return this._max;
     }
-
+    
     set max(max) {
         this._max = max;
     }
-
+    
     get min() {
         return this._min;
     }
-
+    
     set min(min) {
         this._min = min;
     }
-
+    
     set history(data) {
         this._history = data;
     }
-
+    
     update(history = undefined) {
         if (history) {
             this._history = history;
         }
         if (!this._history) return;
         this._updateEndTime();
-
+        
         const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
-
+        
         // extend length to fill missing history
         const requiredNumOfPoints = Math.ceil(this.hours * this.points);
         histGroups.length = requiredNumOfPoints;
-
+        
         this.coords = this._calcPoints(histGroups);
         this.min = Math.min(...this.coords.map((item) => Number(item[V])));
         this.max = Math.max(...this.coords.map((item) => Number(item[V])));
     }
-
+    
     _reducer(res, item) {
         const age = this._endTime - new Date(item.last_changed).getTime();
         const interval = (age / ONE_HOUR) * this.points - this.hours * this.points;
@@ -92,11 +92,11 @@ export default class Graph {
         }
         return res;
     }
-
+    
     _calcPoints(history) {
         let xRatio = this.width / (this.hours * this.points - 1);
         xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
-
+        
         const coords = [];
         let last = history.filter(Boolean)[0];
         let x;
@@ -111,22 +111,22 @@ export default class Graph {
         }
         return coords;
     }
-
+    
     _calcY(coords) {
         // account for logarithmic graph
         const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
         const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
-
+        
         const yRatio = (max - min) / this.height || 1;
         const coords2 = coords.map((coord) => {
             const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
             const coordY = this.height - (val - min) / yRatio + this.margin[Y] * 2;
             return [coord[X], coordY, coord[V]];
         });
-
+        
         return coords2;
     }
-
+    
     getPoints() {
         let {coords} = this;
         if (coords.length === 1) {
@@ -146,7 +146,7 @@ export default class Graph {
             return coords.map((point, i) => [point[X], point[Y], point[V], i]);
         }
     }
-
+    
     getPath() {
         let {coords} = this;
         if (coords.length === 1) {
@@ -158,7 +158,7 @@ export default class Graph {
         let path = "";
         let last = coords[0];
         path += `M${last[X]},${last[Y]}`;
-
+        
         coords.forEach((point) => {
             next = point;
             Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
@@ -169,12 +169,12 @@ export default class Graph {
         path += ` ${next[X]},${next[Y]}`;
         return path;
     }
-
+    
     computeGradient(thresholds, logarithmic) {
         const scale = logarithmic
             ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
             : this._max - this._min;
-
+        
         return thresholds.map((stop, index, arr) => {
             let color;
             if (stop.value > this._max && arr[index + 1]) {
@@ -198,7 +198,7 @@ export default class Graph {
             };
         });
     }
-
+    
     getFill(path) {
         const height = this.height + this.margin[Y] * 4;
         let fill = path;
@@ -206,7 +206,7 @@ export default class Graph {
         fill += ` L ${this.coords[0][X]}, ${height} z`;
         return fill;
     }
-
+    
     getBars(position, total, spacing = 4) {
         const coords = this._calcY(this.coords);
         const xRatio = (this.width - spacing) / Math.ceil(this.hours * this.points) / total;
@@ -218,52 +218,52 @@ export default class Graph {
             value: coord[V],
         }));
     }
-
+    
     _midPoint(Ax, Ay, Bx, By) {
         const Zx = (Ax - Bx) / 2 + Bx;
         const Zy = (Ay - By) / 2 + By;
         return [Zx, Zy];
     }
-
+    
     _average(items) {
         return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0) / items.length;
     }
-
+    
     _median(items) {
         const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
         const mid = Math.floor((itemsDup.length - 1) / 2);
         if (itemsDup.length % 2 === 1) return parseFloat(itemsDup[mid].state);
         return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
     }
-
+    
     _maximum(items) {
         return Math.max(...items.map((item) => item.state));
     }
-
+    
     _minimum(items) {
         return Math.min(...items.map((item) => item.state));
     }
-
+    
     _first(items) {
         return parseFloat(items[0].state);
     }
-
+    
     _last(items) {
         return parseFloat(items[items.length - 1].state);
     }
-
+    
     _sum(items) {
         return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
     }
-
+    
     _delta(items) {
         return this._maximum(items) - this._minimum(items);
     }
-
+    
     _diff(items) {
         return this._last(items) - this._first(items);
     }
-
+    
     _lastValue(items) {
         if (["delta", "diff"].includes(this.aggregateFuncName)) {
             return 0;
@@ -271,7 +271,7 @@ export default class Graph {
             return parseFloat(items[items.length - 1].state) || 0;
         }
     }
-
+    
     _updateEndTime() {
         this._endTime = new Date();
         switch (this._groupBy) {

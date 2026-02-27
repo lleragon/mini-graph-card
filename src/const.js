@@ -54,19 +54,22 @@ const DEFAULT_CONF = {
     tap_action: {
         action: "more-info",
     },
+    
+    //NEW
+    graph_type: "line", //line || bar || none
 };
 
 const DEFAULT_CONF_SHOW = {
     name: true,
     icon: true,
     state: true,
-    graph: "line",
     labels: "hover",
-    labels_secondary: "hover",
     extrema: false,
-    //TODO	legend: true,
+    
+    //NEW/DONE TODO
+    line: true,
     fill: true,
-    points: "hover",
+    points: "hover", //true ||false
 };
 
 const X = 0;

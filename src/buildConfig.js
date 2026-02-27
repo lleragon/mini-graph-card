@@ -47,28 +47,28 @@ const interpolateStops = (stops) => {
     if (stops[0].value == null || stops[stops.length - 1].value == null) {
         throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
     }
-
+    
     let leftValuedIndex = 0;
     let rightValuedIndex = null;
-
+    
     return stops.map((stop, stopIndex) => {
         if (stop.value != null) {
             leftValuedIndex = stopIndex;
             return {...stop};
         }
-
+        
         if (rightValuedIndex == null) {
             rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
         } else if (stopIndex > rightValuedIndex) {
             leftValuedIndex = rightValuedIndex;
             rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
         }
-
+        
         // y = mx + b
         // m = dY/dX
         // x = index in question
         // b = left value
-
+        
         const leftValue = stops[leftValuedIndex].value;
         const rightValue = stops[rightValuedIndex].value;
         const m = (rightValue - leftValue) / (rightValuedIndex - leftValuedIndex);
@@ -82,7 +82,7 @@ const interpolateStops = (stops) => {
 const computeThresholds = (stops, type) => {
     const valuedStops = interpolateStops(stops);
     valuedStops.sort((a, b) => b.value - a.value);
-
+    
     if (type === "smooth") {
         return valuedStops;
     } else {
@@ -101,33 +101,33 @@ const computeThresholds = (stops, type) => {
 
 export default (config) => {
     //if (!Array.isArray(config.entity)) throw new Error(`Please provide the "entity" option as a list.\n See ${URL_DOCS}`);
-
+    
     const conf = {
         ...DEFAULT_CONF,
         ...JSON.parse(JSON.stringify(config)),
         show: {...DEFAULT_CONF_SHOW, ...config.show},
     };
-
+    
     conf.entity = String(conf.entity);
     //conf.entities.forEach((entity, i) => {
     //		if (typeof entity === "string") conf.entities[i] = { entity };
     //	});
-
+    
     conf.state_map.forEach((state, i) => {
         // convert string values to objects
         if (typeof state === "string") conf.state_map[i] = {value: state, label: state};
         // make sure label is set
         conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
     });
-
+    
     if (typeof config.line_color === "string") conf.line_color = [config.line_color, ...DEFAULT_COLORS];
-
+    
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.color_thresholds = computeThresholds(conf.color_thresholds, conf.color_thresholds_transition);
     const additional = conf.hours_to_show > 24 ? {day: "numeric", weekday: "short"} : {};
     const hourFormat = {hourCycle: "h23"};
     conf.format = {...hourFormat, ...additional};
-
+    
     // override points per hour to mach group_by function
     switch (conf.group_by) {
         case "date":
@@ -139,8 +139,8 @@ export default (config) => {
         default:
             break;
     }
-
-    if (conf.show.graph === "bar") {
+    
+    if (conf.graph_type === "bar") {
         //const entities = conf.entities.length;
         const entities = 1;
         if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
@@ -148,6 +148,6 @@ export default (config) => {
             log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
         }
     }
-
+    
     return conf;
 };

@@ -6,7 +6,7 @@ TO REMOVE
     all Indicator
 
     this.length = []; //Only used for animation, adapt dev branch?
-
+    secondary y-axis
 
 // biome-ignore format: reason
 
@@ -49,50 +49,36 @@ value_factor: 0
 //lower_bound:
 //upper_bound:
 //min_bound_range:
-//lower_bound_secondary:
-//upper_bound_secondary:
-//min_bound_range_secondary:
 //value_factor:
 //logarithmic:
+
+graph_type: "line", //line || bar || none
 
 show:
    name: true
     icon: true
     state: true
-    graph: "line"
     fill: true
     points: "hover"
-    legend: true       //REMOVED
     extrema: false
     labels: "hover"
-    labels_secondary: "hover"
+    line: true
 
     //missing in default config
     //average:false
     //name_adaptive_color: false
     //icon_adaptive_color: false
+    //state_adaptive_color
     //loading_indicator: true
 
 //missing in default config
-entities:
-    - entity:
-      attribute
-      name
-      color
-      unit
-      aggregate_func
-      show_state
-      show_legend_state
-      show_indicator
-      show_graph
-      show_line
-      show_fill
-      show_points
-      show_legend
-      state_adaptive_color
-      y_axis
-      fixed_value
-      smoothing
+entity:
+entity_attribute: //false
+entity_color: //TODO REMOVE
+
+
+
+
 
 
 ORIG KONFIG:
