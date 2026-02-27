@@ -16,7 +16,7 @@ import {compress, decompress, getAvg, getFirstDefinedItem, getMax, getMilli, get
 class ExtremaGraphCard extends LitElement {
     constructor() {
         super();
-        this.id = Math.random().toString(36).substr(2, 9);
+        this.id = Math.random().toString(36).substring(2, 12);
         this.config = {};
         this.bound = [0, 0];
         this.boundSecondary = [0, 0];
@@ -171,30 +171,30 @@ class ExtremaGraphCard extends LitElement {
         const {show, align_icon, align_header, font_size_header} = this.config;
         return show.name || (show.icon && align_icon !== "state")
             ? html`
-          <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
-            ${this.renderName()} ${align_icon !== "state" ? this.renderIcon() : ""}
-          </div>
-        `
+                    <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
+                        ${this.renderName()} ${align_icon !== "state" ? this.renderIcon() : ""}
+                    </div>
+            `
             : "";
     }
 
     renderIcon() {
         if (this.config.icon_image !== undefined) {
             return html`
-        <div class="icon">
-          <img src="${this.config.icon_image}" height="25"/>
-        </div>
-      `;
+                <div class="icon">
+                    <img src="${this.config.icon_image}" height="25"/>
+                </div>
+            `;
         }
 
         const {icon, icon_adaptive_color} = this.config.show;
         return icon
             ? html`
-      <div class="icon" loc=${this.config.align_icon}
-        style=${icon_adaptive_color ? `color: ${this.color};` : ""}>
-        <ha-icon .icon=${this.computeIcon()}></ha-icon>
-      </div>
-    `
+                    <div class="icon" loc=${this.config.align_icon}
+                         style=${icon_adaptive_color ? `color: ${this.color};` : ""}>
+                        <ha-icon .icon=${this.computeIcon()}></ha-icon>
+                    </div>
+            `
             : "";
     }
 
@@ -204,21 +204,21 @@ class ExtremaGraphCard extends LitElement {
         const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${this.color};` : "";
 
         return html`
-      <div class="name flex">
-        <span class="ellipsis" style=${color}>${name}</span>
-      </div>
-    `;
+            <div class="name flex">
+                <span class="ellipsis" style=${color}>${name}</span>
+            </div>
+        `;
     }
 
     renderStates() {
         //TODO integrate in render state
         if (this.config.show.state)
             return html`
-        <div class="states flex" loc=${this.config.align_state}>
-          ${this.renderState(0)}
-          ${this.config.align_icon === "state" ? this.renderIcon() : ""}
-        </div>
-      `;
+                <div class="states flex" loc=${this.config.align_state}>
+                    ${this.renderState(0)}
+                    ${this.config.align_icon === "state" ? this.renderIcon() : ""}
+                </div>
+            `;
     }
 
     getObjectAttr(obj, path) {
@@ -245,37 +245,37 @@ class ExtremaGraphCard extends LitElement {
         const entity = isTooltip ? tooltipEntity : id;
         const entityConfig = this.config.entity;
         return html`
-        <div
-          class="state"
-          @click=${(e) => this.handlePopup(e, this.entity)}
-          style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ""}>
+            <div
+                    class="state"
+                    @click=${(e) => this.handlePopup(e, this.entity)}
+                    style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ""}>
           <span class="state__value ellipsis">
             ${this.computeState(value)}
           </span>
-          <span class="state__uom ellipsis">
+                <span class="state__uom ellipsis">
             ${this.computeUom()}
           </span>
-          ${this.renderStateTime()}
-        </div>
-      `;
+                ${this.renderStateTime()}
+            </div>
+        `;
     }
 
     renderStateTime() {
         if (this.tooltip.value === undefined) return;
         return html`
-      <div class="state__time">
-        ${
-            this.tooltip.label
-                ? html`
-          <span class="tooltip--label">${this.tooltip.label}</span>
-        `
-                : html`
-          <span>${this.tooltip.time[0]}</span> -
-          <span>${this.tooltip.time[1]}</span>
-        `
-        }
-      </div>
-    `;
+            <div class="state__time">
+                ${
+                        this.tooltip.label
+                                ? html`
+                                    <span class="tooltip--label">${this.tooltip.label}</span>
+                                `
+                                : html`
+                                    <span>${this.tooltip.time[0]}</span> -
+                                    <span>${this.tooltip.time[1]}</span>
+                                `
+                }
+            </div>
+        `;
     }
 
     renderGraph() {
@@ -288,14 +288,15 @@ class ExtremaGraphCard extends LitElement {
                         ${
                                 ready
                                         ? html`
-            <div class="graph__container">
-              ${this.renderLabels()}
-              ${this.renderLabelsSecondary()}
-              <div class="graph__container__svg">
-                ${this.renderSvg()}
-              </div>
-            </div> `
-                                        : html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`
+                                            <div class="graph__container">
+                                                ${this.renderLabels()}
+                                                ${this.renderLabelsSecondary()}
+                                                <div class="graph__container__svg">
+                                                    ${this.renderSvg()}
+                                                </div>
+                                            </div> `
+                                        : html`
+                                            <ha-spinner aria-label="Loading" size="small"></ha-spinner>`
                         }
                     </div>`
             : "";
@@ -483,43 +484,43 @@ class ExtremaGraphCard extends LitElement {
     renderLabels() {
         if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
         return html`
-      <div class="graph__labels --primary flex">
-        <span class="label--max">${this.computeState(this.bound[1])}</span>
-        <span class="label--min">${this.computeState(this.bound[0])}</span>
-      </div>
-    `;
+            <div class="graph__labels --primary flex">
+                <span class="label--max">${this.computeState(this.bound[1])}</span>
+                <span class="label--min">${this.computeState(this.bound[0])}</span>
+            </div>
+        `;
     }
 
     //TODO NEEDED?
     renderLabelsSecondary() {
         if (!this.config.show.labels_secondary || this.secondaryYaxisSeries.length === 0) return;
         return html`
-      <div class="graph__labels --secondary flex">
-        <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
-        <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
-      </div>
-    `;
+            <div class="graph__labels --secondary flex">
+                <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
+                <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
+            </div>
+        `;
     }
 
     renderInfo() {
         return this.abs.length > 0
             ? html`
-      <div class="info flex">
-        ${this.abs.map(
-                (entry) => html`
-          <div class="info__item">
-            <span class="info__item__type">${entry.type}</span>
-            <span class="info__item__value">
+                    <div class="info flex">
+                        ${this.abs.map(
+                                (entry) => html`
+                                    <div class="info__item">
+                                        <span class="info__item__type">${entry.type}</span>
+                                        <span class="info__item__value">
               ${this.computeState(entry.state)}
             </span>
-            <span class="info__item__time">
+                                        <span class="info__item__time">
               ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ""}
             </span>
-          </div>
-        `,
-            )}
-      </div>
-    `
+                                    </div>
+                                `,
+                        )}
+                    </div>
+            `
             : html``;
     }
 
