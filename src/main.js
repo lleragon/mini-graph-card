@@ -20,10 +20,10 @@ class ExtremaGraphCard extends LitElement {
         this.config = {};
         this.bound = [0, 0];
         this.entity = {};
-        this.line  = undefined; //todo
-        this.bar  = undefined; //todo
+        this.line = undefined; //todo
+        this.bar = undefined; //todo
         this.abs = [];
-        this.fill  = undefined; //todo
+        this.fill = undefined; //todo
         this.points = [];
         this.gradient = undefined; //todo
         this.tooltip = {};
