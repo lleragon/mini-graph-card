@@ -20,12 +20,12 @@ class ExtremaGraphCard extends LitElement {
         this.config = {};
         this.bound = [0, 0];
         this.entity = {};
-        this.line = {};
-        this.bar = {};
+        this.line  = undefined; //todo
+        this.bar  = undefined; //todo
         this.abs = [];
-        this.fill = {};
+        this.fill  = undefined; //todo
         this.points = [];
-        this.gradient = {};
+        this.gradient = undefined; //todo
         this.tooltip = {};
         this.updateQueue = []; //TODO
         this.updating = false;
@@ -62,7 +62,7 @@ class ExtremaGraphCard extends LitElement {
         const entityState = hass?.states[this.config.entity];
         if (entityState && this.entity !== entityState) {
             this.entity = entityState;
-            queue.push(`${entityState.entity_id}}`);
+            queue.push(`${entityState.entity_id}`);
             this.stateChanged = true;
             
             //this.entity = [...this.entity]; TODO
@@ -83,6 +83,8 @@ class ExtremaGraphCard extends LitElement {
     setConfig(config) {
         this.config = buildConfig(config, this.config); //TODO ? Second para
         this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
+        
+        console.debug("config", this.config);
         
         if (!this.Graph || this.config.entity !== config.entity) {
             if (this._hass) this.hass = this._hass;
@@ -272,9 +274,10 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderGraph() {
-        if ((this.graph_type !== 'line') && (this.graph_type !== 'bar')) return "";
+        console.debug("renderGraph1");
+        if ((this.config.graph_type !== 'line') && (this.config.graph_type !== 'bar')) return "";
         let content;
-        
+        console.debug("renderGraph2");
         if ((this.entity && (this.Graph._history !== undefined)) || this.config.show.loading_indicator !== true) {
             content = html`
                 <div class="graph__container">
@@ -365,21 +368,33 @@ class ExtremaGraphCard extends LitElement {
         //TODO can be removed? "?inactive=${this.tooltip.value !== undefined && this.tooltip.entity !== i}"
     }
     
-    renderSvgGradient(gradients) {
-        if (!gradients) return;
-        const items = gradients.map((gradient, i) => {
-            if (!gradient) return "";
-            return svg`
-        <linearGradient id=${`grad-${this.id}-${i}`} gradientTransform="rotate(90)">
+    renderSvgGradient(gradient) {
+        if (!gradient) return;
+        return svg`
+        <linearGradient id=${`grad-${this.id}`} gradientTransform="rotate(90)">
           ${gradient.map(
-                (stop) => svg`
+            (stop) => svg`
             <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
           `,
-            )}
+        )}
         </linearGradient>`;
-        });
-        return svg`${items}`;
     }
+    
+    /* TODO
+ 
+    const items = gradients.map((gradient, i) => {
+        if (!gradient) return "";
+        return svg`
+    <linearGradient id=${`grad-${this.id}-${i}`} gradientTransform="rotate(90)">
+      ${gradient.map(
+            (stop) => svg`
+        <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
+      `,
+        )}
+    </linearGradient>`;
+    });
+    return svg`${items}`;*/
+    
     
     renderSvgLineRect(line) {
         if (!line) return;
@@ -423,6 +438,7 @@ class ExtremaGraphCard extends LitElement {
     
     renderSvg() {
         const {height} = this.config;
+        console.debug(this.gradient);
         return svg`
       <svg preserveAspectRatio='none' width='100%' height='${height !== 0 ? height : 0}px' viewBox='0 0 500 ${height}'
         @click=${(e) => e.stopPropagation()}>
@@ -430,13 +446,13 @@ class ExtremaGraphCard extends LitElement {
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
-          ${this.renderSvgFill(this.fill, i)}
-          ${this.renderSvgFillRect(this.fill, i)}
-          ${this.renderSvgLine(this.line, i)}
-          ${this.renderSvgLineRect(this.line, i)}
-          ${this.renderSvgBars(this.bar, i)}
+          ${this.renderSvgFill(this.fill)}
+          ${this.renderSvgFillRect(this.fill)}
+          ${this.renderSvgLine(this.line)}
+          ${this.renderSvgLineRect(this.line)}
+          ${this.renderSvgBars(this.bar)}
         </g>
-        ${this.renderSvgPoints(this.points, i)}
+        ${this.renderSvgPoints(this.points)}
       </svg>`;
     }
     
@@ -472,7 +488,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderLabels() {
-        if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
+        if (!this.config.show.labels) return;
         return html`
             <div class="graph__labels --primary flex">
                 <span class="label--max">${this.computeState(this.bound[1])}</span>
@@ -698,7 +714,7 @@ class ExtremaGraphCard extends LitElement {
     
     updateBounds({config} = this) {
         this.bound = this.getBoundaries(
-            this.Graph,
+            [this.Graph],   //todo dont need to be an array
             config.lower_bound,
             config.upper_bound,
             this.bound,
@@ -718,6 +734,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     async updateEntity(initStart, end) {
+        
         if (
             !this.entity ||
             !this.updateQueue.includes(`${this.entity.entity_id}`)

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="ebdb2762-99ac-4db5-a436-95f28510c7da" name="angband">
+        <fileTransfer rootFolder="/mnt/ssd/_docker-appdata/homeassistant/appdata/www/extrema-graph-card" accessType="SFTP" host="angband.lenicka.ch" port="22" sshConfigId="5cfc868f-7a77-4bde-be28-293a1e78270c" sshConfig="root@angband.lenicka.ch:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
