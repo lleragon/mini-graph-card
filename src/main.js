@@ -81,7 +81,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     setConfig(config) {
-        this.config = buildConfig(config, this.config); //TODO ? Second para
+        this.config = buildConfig(config);
         this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
         
         console.debug("config", this.config);
