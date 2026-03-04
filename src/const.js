@@ -43,6 +43,7 @@ const DEFAULT_CONF = {
     group_by: "interval",
     line_color: [...DEFAULT_COLORS],
     color_thresholds: [],
+    color: "var(--accent-color)",
     color_thresholds_transition: "smooth",
     line_width: 5,
     bar_spacing: 4,

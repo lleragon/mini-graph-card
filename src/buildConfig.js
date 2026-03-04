@@ -1,23 +1,24 @@
 import {DEFAULT_COLORS, DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS, URL_DOCS} from "./const";
 import {log} from "./utils";
 
-function buildConfig(config) {
+function buildConfig(rawConfig) {
     let conf;
-    if (typeof config.entity !== "string") {
+    
+    if (typeof rawConfig.entity !== "string") {
         throw new Error(`Please provide a entity. See ${URL_DOCS}`);
     }
     
     conf = {
         ...DEFAULT_CONF,
-        ...structuredClone(config),
-    };
-    
+        ...structuredClone(rawConfig),
+    }
     conf.show = {
         ...DEFAULT_CONF_SHOW,
-        ...config.show
+        ...rawConfig.show
     };
     
     conf.entity = String(conf.entity);
+    conf.font_size = (rawConfig.font_size / 100) * FONT_SIZE || FONT_SIZE;
     
     conf.state_map.forEach((state, i) => {
         // convert string values to objects
@@ -26,10 +27,12 @@ function buildConfig(config) {
         conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
     });
     
-    if (typeof config.line_color === "string") conf.line_color = [config.line_color, ...DEFAULT_COLORS];
+    TODO in main: replace color_thershold and line_color with color and make array check
+    if (Array.isArray(conf.color)) {
+        // color threshold
+        conf.color = computeThresholds(conf.color, conf.color_thresholds_transition);
+    }
     
-    conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
-    conf.color_thresholds = computeThresholds(conf.color_thresholds, conf.color_thresholds_transition);
     const additional = conf.hours_to_show > 24 ? {day: "numeric", weekday: "short"} : {};
     const hourFormat = {hourCycle: "h23"};
     conf.format = {...hourFormat, ...additional};
@@ -46,13 +49,9 @@ function buildConfig(config) {
             break;
     }
     
-    if (conf.graph_type === "bar") {
-        //const entities = conf.entities.length;
-        const entities = 1;
-        if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
-            conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
+    if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
+            conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
             log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
-        }
     }
     
     return conf;

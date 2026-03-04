@@ -564,7 +564,7 @@ class ExtremaGraphCard extends LitElement {
             }
         }
         
-        return this.config.entity_color || intColor || line_color;
+        return intColor || line_color;
     }
     
     computeIcon() {
@@ -658,7 +658,7 @@ class ExtremaGraphCard extends LitElement {
                 if (config.show.points) {
                     this.points = this.Graph.getPoints();
                 }
-                if (config.color_thresholds.length > 0 && !config.entity_color)
+                if (config.color_thresholds.length > 0) //TODO && !config.entity_color)
                     this.gradient = this.Graph.computeGradient(config.color_thresholds, this.config.logarithmic);
             }
             this.line = [...this.line];

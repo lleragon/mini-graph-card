@@ -8,8 +8,6 @@ TO REMOVE
     this.length = []; //Only used for animation, adapt dev branch?
     secondary y-axis
 
-// biome-ignore format: reason
-
 
 NEW CONFIG
 ------------------------------------------------------------------------------------------------------------------------
@@ -23,9 +21,10 @@ hours_to_show: 24
 points_per_hour: 0.5
 aggregate_func: "avg"
 group_by: "interval"
-//line_color:
-//color_thresholds
+//line_color: TODO DELETE
+//color_thresholds TODO DELETE
 color_thresholds_transition: "smooth"
+color: "var(--accent-color)" or colorcode or rgb or thresholds      NEW
 line_width: 5
 bar_spacing: 4
 smoothing: true
@@ -33,7 +32,8 @@ smoothing: true
 cache: true
 cache_compress: false
 value_factor: 0
-//tap_action:
+tap_action:
+    action: "more-info"
 
 //missing in default config
 //align_icon:
@@ -74,7 +74,6 @@ show:
 //missing in default config
 entity:
 entity_attribute: //false
-entity_color: //TODO REMOVE
 
 
 
