@@ -2,7 +2,6 @@ import {stateIcon} from "custom-card-helpers";
 import {interpolateRgb} from "d3-interpolate";
 import {html, LitElement, svg} from "lit-element";
 import localForage from "localforage/src/localforage";
-import SparkMD5 from "spark-md5";
 import buildConfig from "./buildConfig";
 import Graph from "./graph";
 import handleClick from "./handleClick";
@@ -12,6 +11,11 @@ import {version} from "../package.json";
 
 import {ICONS, ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
 import {compress, decompress, getAvg, getMax, getMilli, getMin, getTime, log,} from "./utils";
+import {PropertyValues} from "@lit/reactive-element";
+
+//TODO Clean cache after entity change
+//TODO check update interval if state doesn't changes for a long time
+
 
 class ExtremaGraphCard extends LitElement {
     constructor() {
@@ -27,11 +31,9 @@ class ExtremaGraphCard extends LitElement {
         this.points = [];
         this.gradient = undefined; //todo
         this.tooltip = {};
-        this.updateQueue = []; //TODO
         this.updating = false;
         this.stateChanged = false;
         this.initial = true;
-        this._md5Config = undefined;
     }
     
     static get styles() {
@@ -51,59 +53,50 @@ class ExtremaGraphCard extends LitElement {
             bound: [],
             abs: [],
             tooltip: {},
-            updateQueue: [],
             color: String,
         };
     }
     
+    //entity state change from home assistant
     set hass(hass) {
         this._hass = hass;
-        const queue = [];
+        console.debug(hass)
         const entityState = hass?.states[this.config.entity];
         if (entityState && this.entity !== entityState) {
             this.entity = entityState;
-            queue.push(`${entityState.entity_id}`);
             this.stateChanged = true;
             
-            //this.entity = [...this.entity]; TODO
-            if (!this.config.update_interval && !this.updating) {
+            if (this.config.update_interval <= 0 && !this.updating) {
                 setTimeout(
-                    () => {
-                        this.updateQueue = [...queue, ...this.updateQueue];
-                        this.updateData();
-                    },
+                    () => {this.updateData();},
                     this.initial ? 0 : 1000,
                 );
-            } else {
-                this.updateQueue = [...queue, ...this.updateQueue];
             }
         }
     }
     
-    setConfig(config) {
-        this.config = buildConfig(config);
-        this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
+    //card config update from home assistant
+    setConfig(rawConfig) {
+        this.config = buildConfig(rawConfig);
         
-        if (!this.Graph || this.config.entity !== config.entity) {
-            if (this._hass) this.hass = this._hass;
-            this.Graph = new Graph(
-                500,
-                this.config.height,
-                [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
-                this.config.hours_to_show,
-                this.config.points_per_hour,
-                this.config.aggregate_func,
-                this.config.group_by,
-                this.config.smoothing && !this.config.entity.startsWith("binary_sensor."), //turn off for binary sensor by default,
-                this.config.logarithmic,
-            );
-            
-        }
+        if (this._hass) this.hass = this._hass; //Trigger data update
+        
+        this.Graph = new Graph(
+            500,
+            this.config.height,
+            [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+            this.config.hours_to_show,
+            this.config.points_per_hour,
+            this.config.aggregate_func,
+            this.config.group_by,
+            this.config.smoothing,
+            this.config.logarithmic,
+        );
     }
     
     connectedCallback() {
         super.connectedCallback();
-        if (this.config.update_interval) {
+        if (this.config.update_interval > 0) {
             window.requestAnimationFrame(() => {
                 this.updateOnInterval();
             });
@@ -120,15 +113,16 @@ class ExtremaGraphCard extends LitElement {
     
     shouldUpdate(changedProps) {
         if (UPDATE_PROPS.some((prop) => changedProps.has(prop))) {
-            this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState(0));
+            this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
             return true;
         }
     }
     
-    firstUpdated() {
+    firstUpdated(changedProperties) {
         this.initial = false;
     }
     
+    TODO FORM HERE -------------------------------------------------------------------------
     render({config} = this) {
         if (!config || !this.entity || !this._hass) return html``;
         if (this.entity === undefined) {
@@ -264,10 +258,10 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderGraph() {
-
+        
         if ((this.config.graph_type !== 'line') && (this.config.graph_type !== 'bar')) return "";
         let content;
-
+        
         if ((this.entity && (this.Graph._history !== undefined)) || this.config.show.loading_indicator !== true) {
             content = html`
                 <div class="graph__container">
@@ -428,7 +422,7 @@ class ExtremaGraphCard extends LitElement {
     
     renderSvg() {
         const {height} = this.config;
-
+        
         return svg`
       <svg preserveAspectRatio='none' width='100%' height='${height !== 0 ? height : 0}px' viewBox='0 0 500 ${height}'
         @click=${(e) => e.stopPropagation()}>
@@ -713,25 +707,21 @@ class ExtremaGraphCard extends LitElement {
     }
     
     async getCache(key, compressed) {
-        const data = await localForage.getItem(`${key}_${this._md5Config}${compressed ? "" : "_raw"}`);
+        const data = await localForage.getItem(`${key}_${this.config.hash}${compressed ? "" : "_raw"}`);
         return data ? (compressed ? decompress(data) : data) : null;
     }
     
     async setCache(key, data, compressed) {
         return compressed
-            ? localForage.setItem(`${key}_${this._md5Config}`, compress(data))
-            : localForage.setItem(`${key}_${this._md5Config}_raw`, data);
+            ? localForage.setItem(`${key}_${this.config.hash}`, compress(data))
+            : localForage.setItem(`${key}_${this.config.hash}_raw`, data);
     }
     
     async updateEntity(initStart, end) {
+        if (!this.entity) return;
         
-        if (
-            !this.entity ||
-            !this.updateQueue.includes(`${this.entity.entity_id}`)
-        )
-            return;
-        this.updateQueue = this.updateQueue.filter((entry) => entry !== `${this.entity.entity_id}`);
         console.debug("updating entity")
+        
         let stateHistory = [];
         let start = initStart;
         let skipInitialState = false;
@@ -893,7 +883,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     setNextUpdate() {
-        if (!this.config.update_interval) {
+        if (!this.config.update_interval > 0) {
             const interval = 1 / this.config.points_per_hour;
             clearInterval(this.interval);
             this.interval = setInterval(() => {

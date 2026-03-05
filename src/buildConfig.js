@@ -1,5 +1,6 @@
 import {DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS, URL_DOCS} from "./const";
 import {log} from "./utils";
+import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
     let conf;
@@ -19,6 +20,7 @@ function buildConfig(rawConfig) {
     
     conf.entity = String(conf.entity);
     conf.font_size = (rawConfig.font_size / 100) * FONT_SIZE || FONT_SIZE;
+    conf.smoothing = conf.smoothing && !conf.entity.startsWith("binary_sensor."); //turn smoothing off for binary sensor
     
     conf.state_map.forEach((state, i) => {
         // convert string values to objects
@@ -52,6 +54,8 @@ function buildConfig(rawConfig) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
         log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
     }
+    
+    conf.hash = SparkMD5.hash(JSON.stringify(conf));
     
     return conf;
 }

@@ -47,6 +47,8 @@ const DEFAULT_CONF = {
     cache: true,
     cache_compress: false,
     value_factor: 0,
+    logarithmic: false,
+    update_interval: 0,
     tap_action: {
         action: "more-info",
     },

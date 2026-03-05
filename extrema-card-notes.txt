@@ -30,6 +30,8 @@ smoothing: true
 cache: true
 cache_compress: false
 value_factor: 0
+logarithmic: false
+update_interval: 0  //zero or littler disables
 tap_action:
     action: "more-info"
 
@@ -41,13 +43,13 @@ tap_action:
 //name:
 //unit:
 //group:
-//update_interval:
+//
 //decimals:
 //lower_bound:
 //upper_bound:
 //min_bound_range:
 //value_factor:
-//logarithmic:
+
 
 graph_type: "line", //line || bar || none
 
