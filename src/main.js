@@ -84,8 +84,6 @@ class ExtremaGraphCard extends LitElement {
         this.config = buildConfig(config);
         this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
         
-        console.debug("config", this.config);
-        
         if (!this.Graph || this.config.entity !== config.entity) {
             if (this._hass) this.hass = this._hass;
             this.Graph = new Graph(
@@ -266,10 +264,10 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderGraph() {
-        console.debug("renderGraph1");
+
         if ((this.config.graph_type !== 'line') && (this.config.graph_type !== 'bar')) return "";
         let content;
-        console.debug("renderGraph2");
+
         if ((this.entity && (this.Graph._history !== undefined)) || this.config.show.loading_indicator !== true) {
             content = html`
                 <div class="graph__container">
@@ -403,7 +401,7 @@ class ExtremaGraphCard extends LitElement {
     
     renderSvgFillRect(fill) {
         if (!fill) return;
-        const svgFill = this.gradient ? `url(#grad-${this.id}-${i})` : this.computeColor(this.entity.state);
+        const svgFill = this.gradient ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
         return svg`
       <rect class='fill--rect'
         id=${`fill-rect-${this.id}`}
@@ -430,7 +428,7 @@ class ExtremaGraphCard extends LitElement {
     
     renderSvg() {
         const {height} = this.config;
-        console.debug(this.gradient);
+
         return svg`
       <svg preserveAspectRatio='none' width='100%' height='${height !== 0 ? height : 0}px' viewBox='0 0 500 ${height}'
         @click=${(e) => e.stopPropagation()}>
@@ -733,7 +731,7 @@ class ExtremaGraphCard extends LitElement {
         )
             return;
         this.updateQueue = this.updateQueue.filter((entry) => entry !== `${this.entity.entity_id}`);
-        
+        console.debug("updating entity")
         let stateHistory = [];
         let start = initStart;
         let skipInitialState = false;
