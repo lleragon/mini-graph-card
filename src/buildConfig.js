@@ -1,4 +1,4 @@
-import {DEFAULT_COLORS, DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS, URL_DOCS} from "./const";
+import {DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS, URL_DOCS} from "./const";
 import {log} from "./utils";
 
 function buildConfig(rawConfig) {
@@ -27,7 +27,6 @@ function buildConfig(rawConfig) {
         conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
     });
     
-    TODO in main: replace color_thershold and line_color with color and make array check
     if (Array.isArray(conf.color)) {
         // color threshold
         conf.color = computeThresholds(conf.color, conf.color_thresholds_transition);
@@ -50,8 +49,8 @@ function buildConfig(rawConfig) {
     }
     
     if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
-            conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
-            log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
+        conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
+        log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
     }
     
     return conf;

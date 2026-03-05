@@ -143,7 +143,7 @@ class ExtremaGraphCard extends LitElement {
                     ?fill=${(config.graph_type !== "none") && config.show.fill}
                     ?points=${config.show.points === "hover"}
                     ?labels=${config.show.labels === "hover"}
-                    ?gradient=${config.color_thresholds.length > 0}
+                    ?gradient=${Array.isArray(config.color)}
                     ?hover=${config.tap_action.action !== "none"}
                     style="font-size: ${config.font_size}px;"
                     @click=${(e) => this.handlePopup(e, config.tap_action.entity || this.entity)}
@@ -175,14 +175,6 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderIcon() {
-        if (this.config.icon_image !== undefined) {
-            return html`
-                <div class="icon">
-                    <img src="${this.config.icon_image}" height="25"/>
-                </div>
-            `;
-        }
-        
         const {icon, icon_adaptive_color} = this.config.show;
         return icon
             ? html`
@@ -546,25 +538,24 @@ class ExtremaGraphCard extends LitElement {
     }*/
     
     computeColor(inState) {
-        const {color_thresholds, line_color} = this.config;
         const state = Number(inState) || 0;
         
         let intColor;
-        if (color_thresholds.length > 0) {
-            const {color} = color_thresholds.find((ele) => ele.value < state) || color_thresholds.slice(-1)[0];
+        if (Array.isArray(this.config.color)) {
+            const {color} = this.config.color.find((ele) => ele.value < state) || this.config.color.slice(-1)[0];
             intColor = color;
-            const index = color_thresholds.findIndex((ele) => ele.value < state);
-            const c1 = color_thresholds[index];
-            const c2 = color_thresholds[index - 1];
+            const index = this.config.color.findIndex((ele) => ele.value < state);
+            const c1 = this.config.color[index];
+            const c2 = this.config.color[index - 1];
             if (c2) {
                 const factor = (c2.value - state) / (c2.value - c1.value);
                 intColor = interpolateRgb(c2.color, c1.color)(factor);
             } else {
-                intColor = index ? color_thresholds[color_thresholds.length - 1].color : color_thresholds[0].color;
+                intColor = index ? this.config.color[this.config.color.length - 1].color : this.config.color[0].color;
             }
         }
         
-        return intColor || line_color;
+        return intColor || this.config.color;
     }
     
     computeIcon() {
@@ -658,8 +649,9 @@ class ExtremaGraphCard extends LitElement {
                 if (config.show.points) {
                     this.points = this.Graph.getPoints();
                 }
-                if (config.color_thresholds.length > 0) //TODO && !config.entity_color)
-                    this.gradient = this.Graph.computeGradient(config.color_thresholds, this.config.logarithmic);
+                if (Array.isArray(config.color)) {
+                    this.gradient = this.Graph.computeGradient(config.color, this.config.logarithmic);
+                }
             }
             this.line = [...this.line];
         }

@@ -21,8 +21,6 @@ hours_to_show: 24
 points_per_hour: 0.5
 aggregate_func: "avg"
 group_by: "interval"
-//line_color: TODO DELETE
-//color_thresholds TODO DELETE
 color_thresholds_transition: "smooth"
 color: "var(--accent-color)" or colorcode or rgb or thresholds      NEW
 line_width: 5
@@ -40,7 +38,6 @@ tap_action:
 //align_state:
 //align_header:
 //icon:
-//icon_image:
 //name:
 //unit:
 //group:
@@ -55,7 +52,7 @@ tap_action:
 graph_type: "line", //line || bar || none
 
 show:
-   name: true
+    name: true
     icon: true
     state: true
     fill: true

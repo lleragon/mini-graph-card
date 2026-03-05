@@ -16,22 +16,17 @@ const ICONS = {
     presence: "hass:account",
     light: "hass:lightbulb",
 };
-const DEFAULT_COLORS = [
-    "var(--accent-color)",
-    "#3498db",
-    "#e74c3c",
-    "#9b59b6",
-    "#f1c40f",
-    "#2ecc71",
-    "#1abc9c",
-    "#34495e",
-    "#e67e22",
-    "#7f8c8d",
-    "#27ae60",
-    "#2980b9",
-    "#8e44ad",
+
+const UPDATE_PROPS = [
+    "entity",
+    "line",
+    "length",
+    "fill",
+    "points",
+    "tooltip",
+    "abs",
+    "config"
 ];
-const UPDATE_PROPS = ["entity", "line", "length", "fill", "points", "tooltip", "abs", "config"];
 
 const DEFAULT_CONF = {
     font_size: FONT_SIZE,
@@ -41,8 +36,8 @@ const DEFAULT_CONF = {
     points_per_hour: 0.5,
     aggregate_func: "avg",
     group_by: "interval",
-    line_color: [...DEFAULT_COLORS],
-    color_thresholds: [],
+    //line_color: [...DEFAULT_COLORS], TODO delete
+    //color_thresholds: [],TODO delete
     color: "var(--accent-color)",
     color_thresholds_transition: "smooth",
     line_width: 5,
@@ -56,7 +51,7 @@ const DEFAULT_CONF = {
         action: "more-info",
     },
     
-    //NEW
+    //NEW TODO
     graph_type: "line", //line || bar || none
 };
 
@@ -84,7 +79,6 @@ export {
     FONT_SIZE_HEADER,
     MAX_BARS,
     ICONS,
-    DEFAULT_COLORS,
     UPDATE_PROPS,
     DEFAULT_CONF,
     DEFAULT_CONF_SHOW,

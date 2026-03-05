@@ -2,6 +2,7 @@ import localForage from "localforage/src/localforage";
 import {version} from "../package.json";
 import {decompress} from "./utils";
 
+//TODO application name from package json
 localForage.config({
     name: "extrema-graph-card",
     version: 1.0,

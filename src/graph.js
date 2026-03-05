@@ -72,8 +72,7 @@ export default class Graph {
         const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
         
         // extend length to fill missing history
-        const requiredNumOfPoints = Math.ceil(this.hours * this.points);
-        histGroups.length = requiredNumOfPoints;
+        histGroups.length = Math.ceil(this.hours * this.points);
         
         this.coords = this._calcPoints(histGroups);
         this.min = Math.min(...this.coords.map((item) => Number(item[V])));
@@ -118,13 +117,11 @@ export default class Graph {
         const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
         
         const yRatio = (max - min) / this.height || 1;
-        const coords2 = coords.map((coord) => {
+        return coords.map((coord) => {
             const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
             const coordY = this.height - (val - min) / yRatio + this.margin[Y] * 2;
             return [coord[X], coordY, coord[V]];
         });
-        
-        return coords2;
     }
     
     getPoints() {
