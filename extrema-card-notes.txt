@@ -12,38 +12,39 @@ TO REMOVE
 NEW CONFIG
 ------------------------------------------------------------------------------------------------------------------------
 
-type: custom:extrema-graph-card
 entity:
-font_size: 14
+font_size: 100
 font_size_header: 14
-height: 100
+height: 100                 //changed default
 hours_to_show: 24
-points_per_hour: 0.5
+points_per_hour: 1          //changed default
 aggregate_func: "avg"
 group_by: "interval"
 color_thresholds_transition: "smooth"
-color: "var(--accent-color)" or colorcode or rgb or thresholds      NEW
-line_width: 5
+color: "var(--accent-color)"            //NEW  colorcode or rgb or thresholds
+line_width: 5                   //TODO TEST FROM HERE
 bar_spacing: 4
 smoothing: true
 //state_map:
 cache: true
-cache_compress: false
+cache_compress: false       //WARNING CAUSES HAVY CPU LOAD AT FREUENT UPDATES
 value_factor: 0
-logarithmic: false
-update_interval: 0  //zero or littler disables
+logarithmic: false                  //TODO TEST
+update_interval: 0  //zero or less disables //TODO TEST
 tap_action:
     action: "more-info"
+graph_type: "line", //line || bar || none       //NEW
+
+align_icon: right
+align_state: left
+//TODO TEST FORM HERE
 
 //missing in default config
-//align_icon:
-//align_state:
 //align_header:
 //icon:
 //name:
 //unit:
 //group:
-//
 //decimals:
 //lower_bound:
 //upper_bound:
@@ -51,7 +52,7 @@ tap_action:
 //value_factor:
 
 
-graph_type: "line", //line || bar || none
+
 
 show:
     name: true
@@ -61,12 +62,13 @@ show:
     points: "hover"
     extrema: false
     labels: "hover"
-    line: true
+    line: true          //NEW
+    icon_adaptive_color: false
+    name_adaptive_color: false
 
     //missing in default config
     //average:false
     //name_adaptive_color: false
-    //icon_adaptive_color: false
     //state_adaptive_color
     //loading_indicator: true
 

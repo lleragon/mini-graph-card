@@ -9,13 +9,12 @@ import style from "./style";
 import "./initialize";
 import {version} from "../package.json";
 
-import {ICONS, ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
+import {ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
 import {compress, decompress, getAvg, getMax, getMilli, getMin, getTime, log,} from "./utils";
-import {PropertyValues} from "@lit/reactive-element";
 
 //TODO Clean cache after entity change
 //TODO check update interval if state doesn't changes for a long time
-
+//TODO HTML verschachtelung  vereinfachen
 
 class ExtremaGraphCard extends LitElement {
     constructor() {
@@ -23,7 +22,7 @@ class ExtremaGraphCard extends LitElement {
         this.id = Math.random().toString(36).substring(2, 12);
         this.config = {};
         this.bound = [0, 0];
-        this.entity = {};
+        this.entity = undefined;
         this.line = undefined; //todo
         this.bar = undefined; //todo
         this.abs = [];
@@ -60,7 +59,6 @@ class ExtremaGraphCard extends LitElement {
     //entity state change from home assistant
     set hass(hass) {
         this._hass = hass;
-        console.debug(hass)
         const entityState = hass?.states[this.config.entity];
         if (entityState && this.entity !== entityState) {
             this.entity = entityState;
@@ -78,7 +76,7 @@ class ExtremaGraphCard extends LitElement {
     //card config update from home assistant
     setConfig(rawConfig) {
         this.config = buildConfig(rawConfig);
-        
+        console.debug("config", this.config);
         if (this._hass) this.hass = this._hass; //Trigger data update
         
         this.Graph = new Graph(
@@ -112,8 +110,12 @@ class ExtremaGraphCard extends LitElement {
     }
     
     shouldUpdate(changedProps) {
+        //todo move color set and remove this function see  https://lit.dev/docs/v1/components/lifecycle/#shouldupdate
+        
         if (UPDATE_PROPS.some((prop) => changedProps.has(prop))) {
-            this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
+            if (this.config && this.entity) {
+                this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
+            }
             return true;
         }
     }
@@ -122,60 +124,57 @@ class ExtremaGraphCard extends LitElement {
         this.initial = false;
     }
     
-    TODO FORM HERE -------------------------------------------------------------------------
-    render({config} = this) {
-        if (!config || !this.entity || !this._hass) return html``;
-        if (this.entity === undefined) {
-            return this.renderWarnings();
+    render() {
+        //TODO check properly update detection on immuntabel properties https://lit.dev/docs/components/properties/#mutating-properties
+        
+        if (!this.config) {
+            return this.renderWarnings(`Card configuration not available.`);
         }
+        if (!this.entity) {
+            return this.renderWarnings(`Entity not available: ${this.config.entity}`);
+        }
+        if (!this.entity) {
+            return this.renderWarnings(`Internal hass object available: ${this.config.entity}`);
+        }
+        
         return html`
             <ha-card
                     class="flex"
-                    ?group=${config.group}
-                    ?fill=${(config.graph_type !== "none") && config.show.fill}
-                    ?points=${config.show.points === "hover"}
-                    ?labels=${config.show.labels === "hover"}
-                    ?gradient=${Array.isArray(config.color)}
-                    ?hover=${config.tap_action.action !== "none"}
-                    style="font-size: ${config.font_size}px;"
-                    @click=${(e) => this.handlePopup(e, config.tap_action.entity || this.entity)}
+                    ?group=${this.config.group}
+                    ?fill=${(this.config.graph_type !== "none") && this.config.show.fill}
+                    ?points=${this.config.show.points === "hover"}
+                    ?labels=${this.config.show.labels === "hover"}
+                    ?gradient=${Array.isArray(this.config.color)}
+                    ?hover=${this.config.tap_action.action !== "none"}
+                    style="font-size: ${this.config.font_size}px;"
+                    @click=${(e) => this.handlePopup(e, this.config.tap_action.entity || this.entity)}
             >
-                ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
+                ${this.renderHeader()}
+                ${this.renderStates()}
+                ${this.renderGraph()}
+                ${this.renderInfo()}
             </ha-card>
         `;
     }
     
-    renderWarnings() {
+    renderWarnings(message) { //TODO more and specif error messages?
         return html`
             <hui-warning>
                 <div>extrema-graph-card</div>
-                <div>
-                    Entity not available: ${this.config.entity}
-                </div>
+                <div>${message}</div>
             </hui-warning>`;
     }
     
     renderHeader() {
         const {show, align_icon, align_header, font_size_header} = this.config;
-        return show.name || (show.icon && align_icon !== "state")
-            ? html`
-                    <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
-                        ${this.renderName()} ${align_icon !== "state" ? this.renderIcon() : ""}
-                    </div>
-            `
-            : "";
-    }
-    
-    renderIcon() {
-        const {icon, icon_adaptive_color} = this.config.show;
-        return icon
-            ? html`
-                    <div class="icon" loc=${this.config.align_icon}
-                         style=${icon_adaptive_color ? `color: ${this.color};` : ""}>
-                        <ha-icon .icon=${this.computeIcon()}></ha-icon>
-                    </div>
-            `
-            : "";
+        
+        if (!show.name && !(show.icon && align_icon !== "state")) return html``
+        
+        return html`
+            <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
+                ${this.renderName()}
+                ${align_icon !== "state" ? this.renderIcon() : ""}
+            </div>`;
     }
     
     renderName() {
@@ -190,17 +189,31 @@ class ExtremaGraphCard extends LitElement {
             </div>`;
     }
     
-    
-    renderStates() {
-        //TODO integrate in render state
-        if (this.config.show.state)
-            return html`
-                <div class="states flex" loc=${this.config.align_state}>
-                    ${this.renderState(0)}
-                    ${this.config.align_icon === "state" ? this.renderIcon() : ""}
-                </div>
-            `;
+    renderIcon() {
+        if (!this.config.show.icon) return;
+        
+        const icon = this.config.icon || this.entity.attributes.icon || stateIcon(this.entity) || "";
+        
+        return html`
+            <div class="icon" loc=${this.config.align_icon}
+                 style=${this.config.show.icon_adaptive_color ? `color: ${this.color};` : ""}>
+                <ha-icon .icon=${icon}></ha-icon>
+            </div>`;
     }
+        //TODO FROM HERE
+    //TODO COncat with renderstate()
+    renderStates() {
+        if (!this.config.show.state) return;
+        
+        return html`
+            <div class="states flex" loc=${this.config.align_state}>
+                ${this.renderState(0)}
+                ${this.config.align_icon === "state" ? this.renderIcon() : ""}
+            </div>
+        `;
+    }
+    
+
     
     getObjectAttr(obj, path) {
         return path.split(".").reduce((res, key) => res?.[key], obj);
@@ -219,15 +232,15 @@ class ExtremaGraphCard extends LitElement {
     renderState() {
         const state = this.getEntityState();
         // use tooltip data for main state element, if tooltip is active
-        const {entity: tooltipEntity, value: tooltipValue} = this.tooltip;
-        const isTooltip = tooltipEntity !== undefined;
+        const {value: tooltipValue} = this.tooltip;
+        const isTooltip = tooltipValue !== undefined;
         const value = isTooltip ? tooltipValue : state;
-        const entity = isTooltip ? tooltipEntity : this.entity;  //TODO
         const state_adaptive_color = this.config.show.state_adaptive_color;
+        
         return html`
             <div class="state"
                  @click=${(e) => this.handlePopup(e, this.entity)}
-                 style=${state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ""}
+                 style=${state_adaptive_color ? `color: ${this.computeColor(value)}` : ""}
             >
                 <span class="state__value ellipsis">
                     ${this.computeState(value)}
@@ -550,10 +563,6 @@ class ExtremaGraphCard extends LitElement {
         return intColor || this.config.color;
     }
     
-    computeIcon() {
-        return this.config.icon || this.entity.attributes.icon || stateIcon(this.entity) || ICONS.temperature;
-    }
-    
     computeUom() {
         return this.config.unit !== undefined
             ? this.config.unit
@@ -626,7 +635,7 @@ class ExtremaGraphCard extends LitElement {
         this.updateBounds();
         
         if (config.graph_type !== "none") {
-            let graphPos = 0;
+            let graphPos = 1; //TODO was 0
             
             if (!this.entity || this.Graph.coords.length === 0) return;
             [this.Graph.min, this.Graph.max] = [this.bound[0], this.bound[1]];
@@ -645,7 +654,6 @@ class ExtremaGraphCard extends LitElement {
                     this.gradient = this.Graph.computeGradient(config.color, this.config.logarithmic);
                 }
             }
-            this.line = [...this.line];
         }
         this.updating = false;
         this.setNextUpdate();
@@ -719,8 +727,6 @@ class ExtremaGraphCard extends LitElement {
     
     async updateEntity(initStart, end) {
         if (!this.entity) return;
-        
-        console.debug("updating entity")
         
         let stateHistory = [];
         let start = initStart;

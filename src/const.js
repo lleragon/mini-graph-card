@@ -27,17 +27,15 @@ const UPDATE_PROPS = [
     "abs",
     "config"
 ];
-
+//TODO SORT CONF
 const DEFAULT_CONF = {
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
     hours_to_show: 24,
-    points_per_hour: 0.5,
+    points_per_hour: 1,
     aggregate_func: "avg",
     group_by: "interval",
-    //line_color: [...DEFAULT_COLORS], TODO delete
-    //color_thresholds: [],TODO delete
     color: "var(--accent-color)",
     color_thresholds_transition: "smooth",
     line_width: 5,
@@ -49,11 +47,11 @@ const DEFAULT_CONF = {
     value_factor: 0,
     logarithmic: false,
     update_interval: 0,
+    align_icon: "right",
+    align_state: "left",
     tap_action: {
         action: "more-info",
     },
-    
-    //NEW TODO
     graph_type: "line", //line || bar || none
 };
 
@@ -63,11 +61,11 @@ const DEFAULT_CONF_SHOW = {
     state: true,
     labels: "hover",
     extrema: false,
-    
-    //NEW/DONE TODO
     line: true,
     fill: true,
     points: "hover", //true ||false
+    name_adaptive_color: false,
+    icon_adaptive_color: false,
 };
 
 const X = 0;

@@ -19,7 +19,7 @@ function buildConfig(rawConfig) {
     };
     
     conf.entity = String(conf.entity);
-    conf.font_size = (rawConfig.font_size / 100) * FONT_SIZE || FONT_SIZE;
+    conf.font_size = ((rawConfig.font_size / 100) * FONT_SIZE).toFixed(2) || FONT_SIZE;
     conf.smoothing = conf.smoothing && !conf.entity.startsWith("binary_sensor."); //turn smoothing off for binary sensor
     
     conf.state_map.forEach((state, i) => {

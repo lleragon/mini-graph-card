@@ -34,7 +34,7 @@ export default [
             if (D3_WARNING.test(message)) {}
         },
         plugins: [
-            literalsHtmlCssMinifier(),
+            //literalsHtmlCssMinifier(), TODO Breaks font_size inline style
             nodeResolve({}),
             commonjs(),
             json(),
