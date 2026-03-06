@@ -29,6 +29,8 @@ const UPDATE_PROPS = [
 ];
 //TODO SORT CONF
 const DEFAULT_CONF = {
+    entity: undefined,
+    entity_attribute: undefined,
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
@@ -66,6 +68,7 @@ const DEFAULT_CONF_SHOW = {
     points: "hover", //true ||false
     name_adaptive_color: false,
     icon_adaptive_color: false,
+    state_adaptive_color: false,
 };
 
 const X = 0;

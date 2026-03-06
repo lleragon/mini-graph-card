@@ -150,7 +150,7 @@ class ExtremaGraphCard extends LitElement {
                     @click=${(e) => this.handlePopup(e, this.config.tap_action.entity || this.entity)}
             >
                 ${this.renderHeader()}
-                ${this.renderStates()}
+                ${this.renderState()}
                 ${this.renderGraph()}
                 ${this.renderInfo()}
             </ha-card>
@@ -200,21 +200,32 @@ class ExtremaGraphCard extends LitElement {
                 <ha-icon .icon=${icon}></ha-icon>
             </div>`;
     }
-        //TODO FROM HERE
-    //TODO COncat with renderstate()
-    renderStates() {
+    
+    renderState() {
         if (!this.config.show.state) return;
+        
+        // use tooltip data for main state element, if tooltip is active
+        const isTooltip = this.tooltip.value !== undefined;
+        const value = isTooltip ? this.tooltip.value : this.getEntityState();
+        
+        const color = this.config.show.state_adaptive_color ? `color: ${this.computeColor(value)}` : ""
         
         return html`
             <div class="states flex" loc=${this.config.align_state}>
-                ${this.renderState(0)}
+                <div class="state" @click=${(e) => this.handlePopup(e, this.entity)} style=${color}>
+                    <span class="state__value ellipsis">
+                        ${this.computeState(value)}
+                    </span>
+                    <span class="state__uom ellipsis">
+                        ${this.computeUom()}
+                    </span>
+                    ${this.renderStateTime()}
+                </div>
                 ${this.config.align_icon === "state" ? this.renderIcon() : ""}
-            </div>
-        `;
+            </div>`;
     }
     
-
-    
+    //TODO Move to Utils
     getObjectAttr(obj, path) {
         return path.split(".").reduce((res, key) => res?.[key], obj);
     }
@@ -229,47 +240,18 @@ class ExtremaGraphCard extends LitElement {
         }
     }
     
-    renderState() {
-        const state = this.getEntityState();
-        // use tooltip data for main state element, if tooltip is active
-        const {value: tooltipValue} = this.tooltip;
-        const isTooltip = tooltipValue !== undefined;
-        const value = isTooltip ? tooltipValue : state;
-        const state_adaptive_color = this.config.show.state_adaptive_color;
+    renderStateTime() {
+        if (this.tooltip.value === undefined) return;
         
         return html`
-            <div class="state"
-                 @click=${(e) => this.handlePopup(e, this.entity)}
-                 style=${state_adaptive_color ? `color: ${this.computeColor(value)}` : ""}
-            >
-                <span class="state__value ellipsis">
-                    ${this.computeState(value)}
-                </span>
-                <span class="state__uom ellipsis">
-                    ${this.computeUom()}
-                </span>
-                ${this.renderStateTime()}
+            <div class="state__time">
+                <span>${this.tooltip.time[0]}</span>
+                -
+                <span>${this.tooltip.time[1]}</span>
             </div>`;
     }
     
-    renderStateTime() {
-        if (this.tooltip.value === undefined) return;
-        return html`
-            <div class="state__time">
-                ${
-                        this.tooltip.label
-                                ? html`
-                                    <span class="tooltip--label">${this.tooltip.label}</span>
-                                `
-                                : html`
-                                    <span>${this.tooltip.time[0]}</span> -
-                                    <span>${this.tooltip.time[1]}</span>
-                                `
-                }
-            </div>
-        `;
-    }
-    
+    //TODO FROM HERE
     renderGraph() {
         
         if ((this.config.graph_type !== 'line') && (this.config.graph_type !== 'bar')) return "";
@@ -453,7 +435,7 @@ class ExtremaGraphCard extends LitElement {
       </svg>`;
     }
     
-    setTooltip(index, value, label = null) {
+    setTooltip(index, value) {
         const {group_by, points_per_hour, hours_to_show, format} = this.config;
         
         // time units in milliseconds in this function
@@ -480,7 +462,6 @@ class ExtremaGraphCard extends LitElement {
             count,
             time: [start, end],
             index,
-            label,
         };
     }
     

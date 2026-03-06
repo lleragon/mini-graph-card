@@ -1,18 +1,18 @@
 TO REMOVE
     compareArray ?
     style state--small
-
+    style tooltip--label
     all legend
     all Indicator
 
     this.length = []; //Only used for animation, adapt dev branch?
     secondary y-axis
 
-
 NEW CONFIG
 ------------------------------------------------------------------------------------------------------------------------
 
-entity:
+entity: undefined                     //NEW
+entity_attribute: "undefined         //NEW
 font_size: 100
 font_size_header: 14
 height: 100                 //changed default
@@ -37,6 +37,7 @@ graph_type: "line", //line || bar || none       //NEW
 
 align_icon: right
 align_state: left
+
 //TODO TEST FORM HERE
 
 //missing in default config
@@ -57,7 +58,7 @@ align_state: left
 show:
     name: true
     icon: true
-    state: true
+    state: true         //TODO WORKS BUT THROWS ERRORS
     fill: true
     points: "hover"
     extrema: false
@@ -65,16 +66,13 @@ show:
     line: true          //NEW
     icon_adaptive_color: false
     name_adaptive_color: false
+    state_adaptive_color: false
 
     //missing in default config
     //average:false
-    //name_adaptive_color: false
-    //state_adaptive_color
     //loading_indicator: true
 
-//missing in default config
-entity:
-entity_attribute: //false
+
 
 
 
