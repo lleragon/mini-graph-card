@@ -480,7 +480,6 @@ class ExtremaGraphCard extends LitElement {
         handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
     }
     
-            //TODO FROM HERE
     computeColor(inState) {
         const state = Number(inState) || 0;
         
@@ -502,6 +501,7 @@ class ExtremaGraphCard extends LitElement {
         return intColor || this.config.color;
     }
     
+            //TODO FROM HERE
     computeUom() {
         return this.config.unit !== undefined
             ? this.config.unit
