@@ -15,6 +15,7 @@ import {compress, decompress, getAvg, getMax, getMilli, getMin, getTime, log,} f
 //TODO Clean cache after entity change
 //TODO check update interval if state doesn't changes for a long time
 //TODO HTML verschachtelung  vereinfachen
+//TODO Render in sep class?
 
 class ExtremaGraphCard extends LitElement {
     constructor() {
@@ -24,7 +25,7 @@ class ExtremaGraphCard extends LitElement {
         this.bound = [0, 0];
         this.entity = undefined;
         this.line = undefined; //todo
-        this.bar = undefined; //todo
+        this.bars = undefined; //todo
         this.abs = [];
         this.fill = undefined; //todo
         this.points = [];
@@ -126,7 +127,7 @@ class ExtremaGraphCard extends LitElement {
     
     render() {
         //TODO check properly update detection on immuntabel properties https://lit.dev/docs/components/properties/#mutating-properties
-        
+        console.debug('rendering');
         if (!this.config) {
             return this.renderWarnings(`Card configuration not available.`);
         }
@@ -251,11 +252,10 @@ class ExtremaGraphCard extends LitElement {
             </div>`;
     }
     
-    //TODO FROM HERE
     renderGraph() {
+        let content;
         
         if ((this.config.graph_type !== 'line') && (this.config.graph_type !== 'bar')) return "";
-        let content;
         
         if ((this.entity && (this.Graph._history !== undefined)) || this.config.show.loading_indicator !== true) {
             content = html`
@@ -274,144 +274,125 @@ class ExtremaGraphCard extends LitElement {
             <div class="graph">${content}</div>`
     }
     
-    renderSvgFill(fill) {
-        if (!fill) return;
+    renderSvgFill() {
+        if (!this.fill) return;
         const fade = this.config.show.fill === "fade";
-        return svg`
-      <defs>
-        <linearGradient id=${`fill-grad-${this.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop stop-color='white' offset='0%' stop-opacity='1'/>
-          <stop stop-color='white' offset='100%' stop-opacity='.15'/>
-        </linearGradient>
-        <mask id=${`fill-grad-mask-${this.id}`}>
-          <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id})`} />
-        </mask>
-      </defs>
-      <mask id=${`fill-${this.id}`}>
-        <path class='fill'
-          type=${this.config.show.fill}
-          fill='white'
-          mask=${fade ? `url(#fill-grad-mask-${this.id})` : ""}
-          d=${this.fill}
-        />
-      </mask>`;
-    }
-    
-    renderSvgLine(line) {
-        if (!line) return;
-        const path = svg`
-      <path
-        class='line'
-        fill='none'
-        stroke-dasharray='none'
-		stroke-dashoffset='none'
-        stroke=${"white"}
-        stroke-width=${this.config.line_width}
-        d=${this.line}
-      />`;
         
         return svg`
-		<mask id=${`line-${this.id}`}>
-			${path}
-		</mask>
-    `;
+            <defs>
+                <linearGradient id=${`fill-grad-${this.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop stop-color='white' offset='0%' stop-opacity='1'/>
+                    <stop stop-color='white' offset='100%' stop-opacity='.15'/>
+                 </linearGradient>
+                <mask id=${`fill-grad-mask-${this.id}`}>
+                    <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id})`} />
+                </mask>
+            </defs>
+            <mask id=${`fill-${this.id}`}>
+                <path class='fill'
+                    type=${this.config.show.fill}
+                    fill='white'
+                    mask=${fade ? `url(#fill-grad-mask-${this.id})` : ""}
+                    d=${this.fill}
+                />
+            </mask>`;
+    }
+    
+    renderSvgLine() {
+        if (!this.line) return;
+        
+        return svg`
+            <mask id=${`line-${this.id}`}>
+                  <path
+                    class='line'
+                    fill='none'
+                    stroke-dasharray='none'
+                    stroke-dashoffset='none'
+                    stroke=${"white"}
+                    stroke-width=${this.config.line_width}
+                    d=${this.line}
+                  />
+            </mask>`;
     }
     
     renderSvgPoint(point) {
         const color = this.gradient ? this.computeColor(point[V]) : "inherit";
+        
         return svg`
-      <circle
-        class='line--point'
-        ?inactive=${this.tooltip.index !== point[3]}
-        style=${`--mcg-hover: ${color};`}
-        stroke=${color}
-        fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
-        @mouseover=${() => this.setTooltip(point[3], point[V])}
-        @mouseout=${() => (this.tooltip = {})}
-      />
-    `;
+            <circle
+                class='line--point'
+                ?inactive=${this.tooltip.index !== point[3]}
+                style=${`--mcg-hover: ${color};`}
+                stroke=${color}
+                fill=${color}
+                cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
+                @mouseover=${() => this.setTooltip(point[3], point[V])}
+                @mouseout=${() => (this.tooltip = {})}
+            />`;
     }
     
-    renderSvgPoints(points) {
-        if (!points) return;
+    renderSvgPoints() {
+        if (!this.points) return;
         const color = this.computeColor(this.entity.state);
+        
         return svg`
-      <g class='line--points'
-        ?tooltip=${this.tooltip.value !== undefined}
-        fill=${color}
-        stroke=${color}
-        stroke-width=${this.config.line_width / 2}>
-        ${points.map((point) => this.renderSvgPoint(point))}
-      </g>`;
-        //TODO can be removed? "?inactive=${this.tooltip.value !== undefined && this.tooltip.entity !== i}"
+            <g class='line--points'
+                ?tooltip=${this.tooltip.value !== undefined}
+                ?inactive=${this.tooltip.value !== undefined}
+                fill=${color}
+                stroke=${color}
+                stroke-width=${this.config.line_width / 2}>
+                ${this.points.map((point) => this.renderSvgPoint(point))}
+            </g>`;
     }
     
-    renderSvgGradient(gradient) {
-        if (!gradient) return;
+    renderSvgGradient() {
+        if (!this.gradient) return;
+        const stops = this.gradient.map((stop) =>
+            svg`<stop stop-color=${stop.color} offset=${`${stop.offset}%`} />`,)
+        
         return svg`
-        <linearGradient id=${`grad-${this.id}`} gradientTransform="rotate(90)">
-          ${gradient.map(
-            (stop) => svg`
-            <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
-          `,
-        )}
-        </linearGradient>`;
+            <linearGradient id=${`grad-${this.id}`} gradientTransform="rotate(90)">
+                ${stops}
+            </linearGradient>`;
     }
     
-    /* TODO
- 
-    const items = gradients.map((gradient, i) => {
-        if (!gradient) return "";
-        return svg`
-    <linearGradient id=${`grad-${this.id}-${i}`} gradientTransform="rotate(90)">
-      ${gradient.map(
-            (stop) => svg`
-        <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
-      `,
-        )}
-    </linearGradient>`;
-    });
-    return svg`${items}`;*/
-    
-    
-    renderSvgLineRect(line) {
-        if (!line) return;
+    renderSvgLineRect() {
+        if (!this.line) return;
         const fill = this.gradient ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
+        
         return svg`
-      <rect class='line--rect'
-        id=${`rect-${this.id}`}
-        fill=${fill} height="100%" width="100%"
-        mask=${`url(#line-${this.id})`}
-      />`;
+          <rect class='line--rect'
+            id=${`rect-${this.id}`}
+            ?inactive=${this.tooltip.value !== undefined}
+            fill=${fill} height="100%" width="100%"
+            mask=${`url(#line-${this.id})`}
+          />`;
     }
     
-    //TODO can be removed? "?inactive=${this.tooltip.value !== undefined && this.tooltip.entity !== i}"
-    
-    renderSvgFillRect(fill) {
-        if (!fill) return;
+    renderSvgFillRect() {
+        if (!this.fill) return;
         const svgFill = this.gradient ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
+        
         return svg`
-      <rect class='fill--rect'
-        id=${`fill-rect-${this.id}`}
-        fill=${svgFill} height="100%" width="100%"
-        mask=${`url(#fill-${this.id})`}
-      />`;
+          <rect class='fill--rect'
+            id=${`fill-rect-${this.id}`}
+            ?inactive=${this.tooltip.value !== undefined}
+            fill=${svgFill} height="100%" width="100%"
+            mask=${`url(#fill-${this.id})`}
+          />`;
     }
     
-    //TODO can be removed? "?inactive=${this.tooltip.value !== undefined && this.tooltip.entity !== i}"
-    
-    renderSvgBars(bars) {
-        if (!bars) return;
-        const items = bars.map((bar, i) => {
-            const color = this.computeColor(bar.value);
-            return svg`
-        <rect class='bar' x=${bar.x} y=${bar.y}
-          height=${bar.height} width=${bar.width} fill=${color}
-          @mouseover=${() => this.setTooltip(i, bar.value)}
-          @mouseout=${() => (this.tooltip = {})}>
-        </rect>`;
-        });
+    renderSvgBars() {
+        if (!this.bars) return;
+        
+        const items = this.bars.map((bar, i) => svg`
+                    <rect class='bar' x=${bar.x} y=${bar.y}
+                      height=${bar.height} width=${bar.width} fill=${this.computeColor(bar.value)}
+                      @mouseover=${() => this.setTooltip(i, bar.value)}
+                      @mouseout=${() => (this.tooltip = {})}>
+                    </rect>`
+        );
         return svg`<g class='bars'>${items}</g>`;
     }
     
@@ -419,20 +400,20 @@ class ExtremaGraphCard extends LitElement {
         const {height} = this.config;
         
         return svg`
-      <svg preserveAspectRatio='none' width='100%' height='${height !== 0 ? height : 0}px' viewBox='0 0 500 ${height}'
-        @click=${(e) => e.stopPropagation()}>
-        <g>
-          <defs>
-            ${this.renderSvgGradient(this.gradient)}
-          </defs>
-          ${this.renderSvgFill(this.fill)}
-          ${this.renderSvgFillRect(this.fill)}
-          ${this.renderSvgLine(this.line)}
-          ${this.renderSvgLineRect(this.line)}
-          ${this.renderSvgBars(this.bar)}
-        </g>
-        ${this.renderSvgPoints(this.points)}
-      </svg>`;
+            <svg preserveAspectRatio='none' width='100%' height='${height}px' viewBox='0 0 500 ${height}'
+                @click=${(e) => e.stopPropagation()}>
+                <g>
+                  <defs>
+                    ${this.renderSvgGradient()}
+                  </defs>
+                  ${this.renderSvgFill()}
+                  ${this.renderSvgFillRect()}
+                  ${this.renderSvgLine()}
+                  ${this.renderSvgLineRect()}
+                  ${this.renderSvgBars()}
+                </g>
+                ${this.renderSvgPoints(this.points)}
+            </svg>`;
     }
     
     setTooltip(index, value) {
@@ -467,34 +448,31 @@ class ExtremaGraphCard extends LitElement {
     
     renderLabels() {
         if (!this.config.show.labels) return;
+        
         return html`
             <div class="graph__labels --primary flex">
                 <span class="label--max">${this.computeState(this.bound[1])}</span>
                 <span class="label--min">${this.computeState(this.bound[0])}</span>
-            </div>
-        `;
+            </div>`;
     }
     
     renderInfo() {
-        return this.abs.length > 0
-            ? html`
-                    <div class="info flex">
-                        ${this.abs.map(
-                                (entry) => html`
-                                    <div class="info__item">
-                                        <span class="info__item__type">${entry.type}</span>
-                                        <span class="info__item__value">
-              ${this.computeState(entry.state)}
-            </span>
-                                        <span class="info__item__time">
-              ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ""}
-            </span>
-                                    </div>
-                                `,
-                        )}
-                    </div>
-            `
-            : html``;
+        if (this.abs.length <= 0) return html``;
+        
+        const info = this.abs.map((entry) => html`
+                    <div class="info__item">
+                        <span class="info__item__type">${entry.type}</span>
+                        <span class="info__item__value">${this.computeState(entry.state)}</span>
+                        <span class="info__item__time">
+                            ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ""}
+                        </span>
+                    </div>`
+        )
+        
+        return html`
+            <div class="info flex">
+                ${info}
+            </div>`;
     }
     
     handlePopup(e, entity) {
@@ -502,27 +480,7 @@ class ExtremaGraphCard extends LitElement {
         handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
     }
     
-    /* TODO Remove?
-    get visibleEntities() {
-        return this.config.entities.filter((entity) => entity.show_graph !== false);
-    }
-
-    get primaryYaxisEntities() {
-        return this.visibleEntities.filter((entity) => entity.y_axis === undefined || entity.y_axis === "primary");
-    }
-
-    get secondaryYaxisEntities() {
-        return this.visibleEntities.filter((entity) => entity.y_axis === "secondary");
-    }
-
-    get primaryYaxisSeries() {
-        return this.primaryYaxisEntities.map((entity) => this.Graph[entity.index]);
-    }
-
-    get secondaryYaxisSeries() {
-        return this.secondaryYaxisEntities.map((entity) => this.Graph[entity.index]);
-    }*/
-    
+            //TODO FROM HERE
     computeColor(inState) {
         const state = Number(inState) || 0;
         
@@ -622,7 +580,7 @@ class ExtremaGraphCard extends LitElement {
             [this.Graph.min, this.Graph.max] = [this.bound[0], this.bound[1]];
             if (config.graph_type === "bar") {
                 const numVisible = 1;
-                this.bar = this.Graph.getBars(graphPos, numVisible, config.bar_spacing);
+                this.bars = this.Graph.getBars(graphPos, numVisible, config.bar_spacing);
                 graphPos += 1;
             } else {
                 const line = this.Graph.getPath();
@@ -636,6 +594,7 @@ class ExtremaGraphCard extends LitElement {
                 }
             }
         }
+        console.debug(this.bars)
         this.updating = false;
         this.setNextUpdate();
     }

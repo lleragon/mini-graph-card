@@ -22,7 +22,7 @@ aggregate_func: "avg"
 group_by: "interval"
 color_thresholds_transition: "smooth"
 color: "var(--accent-color)"            //NEW  colorcode or rgb or thresholds
-line_width: 5                   //TODO TEST FROM HERE
+line_width: 5
 bar_spacing: 4
 smoothing: true
 //state_map:
@@ -58,19 +58,20 @@ align_state: left
 show:
     name: true
     icon: true
-    state: true         //TODO WORKS BUT THROWS ERRORS
+    state: true                     //TODO WORKS BUT THROWS ERRORS
     fill: true
     points: "hover"
     extrema: false
     labels: "hover"
-    line: true          //NEW
+    line: true                      //NEW
     icon_adaptive_color: false
     name_adaptive_color: false
     state_adaptive_color: false
+    loading_indicator: true          //TODO TEST
 
     //missing in default config
     //average:false
-    //loading_indicator: true
+
 
 
 

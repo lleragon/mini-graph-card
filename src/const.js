@@ -69,6 +69,7 @@ const DEFAULT_CONF_SHOW = {
     name_adaptive_color: false,
     icon_adaptive_color: false,
     state_adaptive_color: false,
+    loading_indicator: true
 };
 
 const X = 0;
