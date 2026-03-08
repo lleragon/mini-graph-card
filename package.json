@@ -33,10 +33,9 @@
   },
   "scripts": {
     "build": "npm install && ncu && npm run lint && npm run rollup",
-    "dev": "npm install && ncu && npm run lint && npm run rollup",
     "lint": "npx @biomejs/biome check",
     "rollup": "rollup -c",
-    "watch": "rollup -c --watch",
+    "watch": "npm install && rollup -c --watch",
     "update": "ncu -i"
   }
 }

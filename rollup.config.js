@@ -24,6 +24,9 @@ const D3_WARNING = /Circular dependency.*d3-interpolate/
 export default [
     {
         input: 'src/main.js',
+        watch: {
+            buildDelay: 100
+        },
         output: {
             file: `dist/${pkg.name}-bundle.js`,
             format: 'umd',

@@ -24,12 +24,12 @@ class ExtremaGraphCard extends LitElement {
         this.config = {};
         this.bound = [0, 0];
         this.entity = undefined;
-        this.line = undefined; //todo
-        this.bars = undefined; //todo
+        this.line = undefined;
+        this.bars = undefined;
         this.abs = [];
-        this.fill = undefined; //todo
+        this.fill = undefined;
         this.points = [];
-        this.gradient = undefined; //todo
+        this.gradient = undefined;
         this.tooltip = {};
         this.updating = false;
         this.stateChanged = false;
@@ -501,15 +501,17 @@ class ExtremaGraphCard extends LitElement {
         return intColor || this.config.color;
     }
     
-            //TODO FROM HERE
     computeUom() {
-        return this.config.unit !== undefined
-            ? this.config.unit
-            : !this.config.entity_attribute
-                ? this.entity.attributes.unit_of_measurement || ""
-                : "";
+        if (this.config.unit !== undefined){
+            return this.config.unit;
+        } else if (!this.config.entity_attribute) {
+            return this.entity.attributes.unit_of_measurement || ""
+        } else {
+            return ""
+        }
     }
     
+    //TODO FROM HERE
     computeState(inState) {
         if (this.config.state_map.length > 0) {
             const stateMap = Number.isInteger(inState)
