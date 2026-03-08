@@ -1,3 +1,6 @@
+TODO REMOVE BIOME
+TODO REMOVE ROLLUP SERVE PLUGING
+TODO REMOVE ROLLUP HTMLCCSMINIFIER
 TO REMOVE
     compareArray ?
     style state--small
@@ -12,7 +15,7 @@ NEW CONFIG
 ------------------------------------------------------------------------------------------------------------------------
 
 entity: undefined                     //NEW
-entity_attribute: "undefined         //NEW
+entity_attribute: undefined         //NEW
 font_size: 100
 font_size_header: 14
 height: 100                 //changed default
@@ -28,13 +31,13 @@ smoothing: true
 //state_map:
 cache: true
 cache_compress: false       //WARNING CAUSES HAVY CPU LOAD AT FREUENT UPDATES
-value_factor: 0
+value_factor: 1                 //changed to be a true "factor"
 logarithmic: false                  //TODO TEST
 update_interval: 0  //zero or less disables //TODO TEST
 tap_action:
     action: "more-info"
 graph_type: "line", //line || bar || none       //NEW
-
+decimals: undefined,
 align_icon: right
 align_state: left
 
@@ -46,7 +49,6 @@ align_state: left
 //name:
 //unit:
 //group:
-//decimals:
 //lower_bound:
 //upper_bound:
 //min_bound_range:

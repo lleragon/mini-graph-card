@@ -31,7 +31,7 @@ const UPDATE_PROPS = [
 const DEFAULT_CONF = {
     entity: undefined,
     entity_attribute: undefined,
-    font_size: FONT_SIZE,
+    font_size: 100,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
     hours_to_show: 24,
@@ -46,11 +46,12 @@ const DEFAULT_CONF = {
     state_map: [],
     cache: true,
     cache_compress: false,
-    value_factor: 0,
+    value_factor: 1,
     logarithmic: false,
     update_interval: 0,
     align_icon: "right",
     align_state: "left",
+    decimals: undefined,
     tap_action: {
         action: "more-info",
     },

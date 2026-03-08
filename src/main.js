@@ -67,7 +67,7 @@ class ExtremaGraphCard extends LitElement {
             
             if (this.config.update_interval <= 0 && !this.updating) {
                 setTimeout(
-                    () => {this.updateData();},
+                    () => {this.updateData().then();},
                     this.initial ? 0 : 1000,
                 );
             }
@@ -77,7 +77,8 @@ class ExtremaGraphCard extends LitElement {
     //card config update from home assistant
     setConfig(rawConfig) {
         this.config = buildConfig(rawConfig);
-        console.debug("config", this.config);
+        console.debug("extrema-graph-card: Configuration=", this.config);
+        
         if (this._hass) this.hass = this._hass; //Trigger data update
         
         this.Graph = new Graph(
@@ -460,13 +461,13 @@ class ExtremaGraphCard extends LitElement {
         if (this.abs.length <= 0) return html``;
         
         const info = this.abs.map((entry) => html`
-                    <div class="info__item">
-                        <span class="info__item__type">${entry.type}</span>
-                        <span class="info__item__value">${this.computeState(entry.state)}</span>
-                        <span class="info__item__time">
+            <div class="info__item">
+                <span class="info__item__type">${entry.type}</span>
+                <span class="info__item__value">${this.computeState(entry.state)}</span>
+                <span class="info__item__time">
                             ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ""}
                         </span>
-                    </div>`
+            </div>`
         )
         
         return html`
@@ -502,7 +503,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     computeUom() {
-        if (this.config.unit !== undefined){
+        if (this.config.unit !== undefined) {
             return this.config.unit;
         } else if (!this.config.entity_attribute) {
             return this.entity.attributes.unit_of_measurement || ""
@@ -511,52 +512,44 @@ class ExtremaGraphCard extends LitElement {
         }
     }
     
-    //TODO FROM HERE
-    computeState(inState) {
+
+    computeState(rawState) {
         if (this.config.state_map.length > 0) {
-            const stateMap = Number.isInteger(inState)
-                ? this.config.state_map[inState]
-                : this.config.state_map.find((state) => state.value === inState);
+            const stateMap = Number.isInteger(rawState)
+                ? this.config.state_map[rawState]
+                : this.config.state_map.find((state) => state.value === rawState);
             
             if (stateMap) {
                 return stateMap.label;
             } else {
-                log(`value [${inState}] not found in state_map`);
+                log(`value [${rawState}] not found in state_map`);
             }
         }
         
         let state;
-        if (typeof inState === "string") {
-            state = parseFloat(inState.replace(/,/g, "."));
+        if (typeof rawState === "string") {
+            state = parseFloat(rawState.replace(/,/g, "."));
         } else {
-            state = Number(inState);
-        }
-        const dec = this.config.decimals;
-        const value_factor = 10 ** this.config.value_factor;
-        
-        if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state)) {
-            return this.numberFormat(Math.round(state * value_factor * 100) / 100, this._hass.language);
+            state = Number(rawState);
         }
         
-        const x = 10 ** dec;
-        return this.numberFormat((Math.round(state * value_factor * x) / x).toFixed(dec), this._hass.language, dec);
-    }
-    
-    numberFormat(num, language, dec) {
-        if (!Number.isNaN(Number(num)) && Intl)
-            return new Intl.NumberFormat(language, {
-                minimumFractionDigits: dec,
-            }).format(Number(num));
-        return num.toString();
+        //todo Needs to be created only on config or language chaange
+        let nbrf = new Intl.NumberFormat(this._hass.language, {
+            minimumFractionDigits: this.config.decimals !== undefined ? this.config.decimals : 0,
+            maximumFractionDigits: this.config.decimals !== undefined ? this.config.decimals : 3,
+        });
+        
+        return nbrf.format(state * this.config.value_factor);
     }
     
     updateOnInterval() {
         if (this.stateChanged && !this.updating) {
             this.stateChanged = false;
-            this.updateData();
+            this.updateData().then();
         }
     }
     
+        //TODO FROM HERE
     async updateData({config} = this) {
         this.updating = true;
         

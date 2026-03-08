@@ -3,11 +3,9 @@ import {log} from "./utils";
 import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
+    //todo check for invalid entries
+    //todo check all config entries and remove uneccessdary checks in main
     let conf;
-    
-    if (typeof rawConfig.entity !== "string") {
-        throw new Error(`Please provide a entity. See ${URL_DOCS}`);
-    }
     
     conf = {
         ...DEFAULT_CONF,
@@ -15,11 +13,26 @@ function buildConfig(rawConfig) {
     }
     conf.show = {
         ...DEFAULT_CONF_SHOW,
-        ...rawConfig.show
+        ...structuredClone(rawConfig.show)
     };
     
-    conf.entity = String(conf.entity);
-    conf.font_size = ((rawConfig.font_size / 100) * FONT_SIZE).toFixed(2) || FONT_SIZE;
+    if (typeof conf.entity !== "string") {
+        throw new Error(`Please provide a entity.`);
+    }
+    
+    if (typeof conf.font_size !== 'number' || conf.font_size < 1 && conf.font_size > 500) {
+        throw new Error(`Invalid value for font_size: ${conf.font_size}`);
+    }
+    conf.font_size = ((conf.font_size / 100) * FONT_SIZE).toFixed(2);
+    
+    if (typeof conf.value_factor !== 'number' || conf.value_factor === 0) {
+        throw new Error(`Invalid value for value_factor: ${conf.value_factor}`);
+    }
+    
+    if (conf.decimals !== undefined && (!Number.isInteger(conf.decimals) || conf.decimals < 0)) {
+        throw new Error(`Invalid value for decimals: ${conf.decimals}`);
+    }
+    
     conf.smoothing = conf.smoothing && !conf.entity.startsWith("binary_sensor."); //turn smoothing off for binary sensor
     
     conf.state_map.forEach((state, i) => {

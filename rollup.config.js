@@ -8,15 +8,15 @@ import {literalsHtmlCssMinifier} from '@literals/rollup-plugin-html-css-minifier
 import pkg from './package.json' with {type: 'json'};
 
 const dev = process.env.ROLLUP_WATCH;
-const serveopts = {
-    contentBase: ['./dist'],
-    host: '0.0.0.0',
-    port: 5000,
-    allowCrossOrigin: true,
-    headers: {
-        'Access-Control-Allow-Origin': '*',
-    },
-};
+// const serveopts = { todo
+//     contentBase: ['./dist'],
+//     host: '0.0.0.0',
+//     port: 5000,
+//     allowCrossOrigin: true,
+//     headers: {
+//         'Access-Control-Allow-Origin': '*',
+//     },
+// };
 
 // https://github.com/d3/d3-interpolate/issues/58
 const D3_WARNING = /Circular dependency.*d3-interpolate/
@@ -25,7 +25,7 @@ export default [
     {
         input: 'src/main.js',
         watch: {
-            buildDelay: 100
+            buildDelay: 500
         },
         output: {
             file: `dist/${pkg.name}-bundle.js`,
@@ -42,8 +42,16 @@ export default [
             commonjs(),
             json(),
             babel({babelHelpers: 'bundled'}),
-            dev && serve(serveopts),
-            !dev && terser({enclose: true, format: {comments: false, wrap_iife: true}}),
+            //dev && serve(serveopts), todo
+            !dev && terser({
+                ecma: 2015, // ES6
+                compress: {
+                    module: true,
+                    drop_console: dev ? false : ['debug'],
+                },
+                enclose: true,
+                format: {comments: false, wrap_iife: true}
+            }),
         ],
     },
 ];
