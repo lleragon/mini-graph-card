@@ -553,13 +553,13 @@ class ExtremaGraphCard extends LitElement {
     async updateData({config} = this) {
         this.updating = true;
         
+        //todo move to updateEntity()
         const end = this.getEndDate();
         const start = new Date(end);
         start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
         
         try {
-            const promise = [this.updateEntity(start, end)];
-            await Promise.all(promise);
+            await this.updateEntity(start, end)
         } catch (err) {
             log(err);
         }
@@ -568,15 +568,12 @@ class ExtremaGraphCard extends LitElement {
         
         this.updateBounds();
         
-        if (config.graph_type !== "none") {
-            let graphPos = 1; //TODO was 0
+        if (config.graph_type !== "none" && this.entity && this.Graph.coords.length !== 0) {
+            this.Graph.min = this.bound[0];
+            this.Graph.max = this.bound[1];
             
-            if (!this.entity || this.Graph.coords.length === 0) return;
-            [this.Graph.min, this.Graph.max] = [this.bound[0], this.bound[1]];
             if (config.graph_type === "bar") {
-                const numVisible = 1;
-                this.bars = this.Graph.getBars(graphPos, numVisible, config.bar_spacing);
-                graphPos += 1;
+                this.bars = this.Graph.getBars(config.bar_spacing);
             } else {
                 const line = this.Graph.getPath();
                 if (config.show.line === true) this.line = line;
@@ -589,7 +586,7 @@ class ExtremaGraphCard extends LitElement {
                 }
             }
         }
-        console.debug(this.bars)
+
         this.updating = false;
         this.setNextUpdate();
     }

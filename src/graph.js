@@ -204,11 +204,11 @@ export default class Graph {
         return fill;
     }
     
-    getBars(position, total, spacing = 4) {
+    getBars(spacing = 4) {
         const coords = this._calcY(this.coords);
-        const xRatio = (this.width - spacing) / Math.ceil(this.hours * this.points) / total;
+        const xRatio = (this.width - spacing) / Math.ceil(this.hours * this.points);
         return coords.map((coord, i) => ({
-            x: xRatio * i * total + xRatio * position + spacing,
+            x: xRatio * i + xRatio + spacing,
             y: coord[Y],
             height: this.height - coord[Y] + this.margin[Y] * 4,
             width: xRatio - spacing,
