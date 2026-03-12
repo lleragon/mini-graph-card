@@ -2,20 +2,6 @@ const URL_DOCS = "https://github.com/lleragon/mini-graph-card/blob/master/README
 const FONT_SIZE = 14;
 const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
-const ICONS = {
-    humidity: "hass:water-percent",
-    illuminance: "hass:brightness-5",
-    temperature: "hass:thermometer",
-    battery: "hass:battery",
-    pressure: "hass:gauge",
-    power: "hass:flash",
-    signal_strength: "hass:wifi",
-    motion: "hass:walk",
-    door: "hass:door-closed",
-    window: "hass:window-closed",
-    presence: "hass:account",
-    light: "hass:lightbulb",
-};
 
 const UPDATE_PROPS = [
     "entity",
@@ -52,6 +38,9 @@ const DEFAULT_CONF = {
     align_icon: "right",
     align_state: "left",
     decimals: undefined,
+    lower_bound: undefined,
+    upper_bound: undefined,
+    min_bound_range: undefined,
     tap_action: {
         action: "more-info",
     },
@@ -64,6 +53,7 @@ const DEFAULT_CONF_SHOW = {
     state: true,
     labels: "hover",
     extrema: false,
+    average: false,
     line: true,
     fill: true,
     points: "hover", //true ||false
@@ -83,7 +73,6 @@ export {
     FONT_SIZE,
     FONT_SIZE_HEADER,
     MAX_BARS,
-    ICONS,
     UPDATE_PROPS,
     DEFAULT_CONF,
     DEFAULT_CONF_SHOW,

@@ -11,12 +11,8 @@ const compress = (data) => LZString.compressToUint8Array(JSON.stringify(data));
 
 const decompress = (data) => (typeof data === "string" ? JSON.parse(LZString.decompressFromUint8Array(data)) : data);
 
-const getFirstDefinedItem = (...collection) => collection.find((item) => typeof item !== "undefined");
-
-const compareArray = (a, b) => a.length === b.length && a.every((value, index) => value === b[index]);
-
 const log = (message) => {
     console.warn("extrema-graph-card: ", message);
 };
 
-export {getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log, getFirstDefinedItem, compareArray};
+export {getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log};

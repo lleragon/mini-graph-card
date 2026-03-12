@@ -40,6 +40,9 @@ graph_type: "line", //line || bar || none       //NEW
 decimals: undefined,
 align_icon: right
 align_state: left
+lower_bound: undefined
+upper_bound: undefined
+min_bound_range: undefined
 
 //TODO TEST FORM HERE
 
@@ -49,9 +52,6 @@ align_state: left
 //name:
 //unit:
 //group:
-//lower_bound:
-//upper_bound:
-//min_bound_range:
 //value_factor:
 
 
@@ -64,22 +64,13 @@ show:
     fill: true
     points: "hover"
     extrema: false
+    average:false
     labels: "hover"
     line: true                      //NEW
     icon_adaptive_color: false
     name_adaptive_color: false
     state_adaptive_color: false
     loading_indicator: true          //TODO TEST
-
-    //missing in default config
-    //average:false
-
-
-
-
-
-
-
 
 
 ORIG KONFIG:
