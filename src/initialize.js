@@ -1,13 +1,11 @@
 import localForage from "localforage/src/localforage";
-import {version} from "../package.json";
-import {decompress} from "./utils";
+import {CARD_NAME, CARD_VERSION} from "./const.js";
+import {decompress, logWarning} from "./utils";
 
-//TODO application name from package json
 localForage.config({
-    name: "extrema-graph-card",
-    version: 1.0,
+    name: CARD_NAME,
     storeName: "entity_history_cache",
-    description: "Extrema graph card uses caching for the entity history",
+    description: `${CARD_NAME} uses local caching for the entity history`,
 });
 
 localForage
@@ -15,16 +13,16 @@ localForage
         const value = key.endsWith("-raw") ? data : decompress(data);
         const start = new Date();
         start.setHours(start.getHours() - value.hours_to_show);
-        if (data.version !== version || new Date(value.last_fetched) < start) {
+        if (data.version !== CARD_VERSION || new Date(value.last_fetched) < start) {
             localForage.removeItem(key);
         }
     })
     .catch((err) => {
-        console.warn("Purging has errored: ", err);
+        logWarning("Purging has errored: ", err);
     });
 
 console.info(
-    `%c EXTREMA-GRAPH-CARD %c ${version} `,
+    `%c ${CARD_NAME.toUpperCase()} %c ${CARD_VERSION} `,
     "color: white; background: coral; font-weight: 700;",
     "color: coral; background: white; font-weight: 700;",
 );

@@ -7,10 +7,8 @@ import Graph from "./graph";
 import handleClick from "./handleClick";
 import style from "./style";
 import "./initialize";
-import {version} from "../package.json";
-
-import {ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
-import {compress, decompress, getAvg, getMax, getMilli, getMin, getTime, log,} from "./utils";
+import {CARD_NAME, CARD_NAME_READABLE, CARD_VERSION, ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
+import {compress, decompress, getAvg, getMax, getMilli, getMin, getTime, logWarning,} from "./utils";
 
 //TODO Clean cache after entity change
 //TODO check update interval if state doesn't changes for a long time
@@ -79,7 +77,7 @@ class ExtremaGraphCard extends LitElement {
     //card config update from home assistant
     setConfig(rawConfig) {
         this.config = buildConfig(rawConfig);
-        console.debug("extrema-graph-card: Configuration=", this.config);
+        console.debug(CARD_NAME, ": CONFIG=", this.config);
         
         if (this._hass) this.hass = this._hass; //Trigger data update
         
@@ -526,7 +524,7 @@ class ExtremaGraphCard extends LitElement {
             if (stateMap) {
                 return stateMap.label;
             } else {
-                log(`value [${rawState}] not found in state_map`);
+                logWarning(`value [${rawState}] not found in state_map`);
             }
         }
         
@@ -564,7 +562,7 @@ class ExtremaGraphCard extends LitElement {
         try {
             await this.updateEntity(start, end)
         } catch (err) {
-            log(err);
+            logWarning(err);
         }
         
         if (this.entity) this.Graph.update();
@@ -729,10 +727,10 @@ class ExtremaGraphCard extends LitElement {
                         hours_to_show: this.config.hours_to_show,
                         last_fetched: new Date(),
                         data: stateHistory,
-                        version,
+                        CARD_VERSION,
                     },
                 ).catch((err) => {
-                    log(err);
+                    logWarning(err);
                     localForage.clear();
                 });
             }
@@ -817,13 +815,13 @@ class ExtremaGraphCard extends LitElement {
     }
 }
 
-customElements.define("extrema-graph-card", ExtremaGraphCard);
+customElements.define(CARD_NAME, ExtremaGraphCard);
 
 // Configure the preview in the Lovelace card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
-    type: "extrema-graph-card",
-    name: "Extrema Graph Card",
+    type: CARD_NAME,
+    name: CARD_NAME_READABLE,
     preview: false,
-    description: "TODO",
+    description: "TODO", //todo import from package.json
 });

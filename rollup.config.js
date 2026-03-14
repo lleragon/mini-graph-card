@@ -22,7 +22,7 @@ export default [
             name: pkg.name,
             sourcemap: !!dev,
         },
-        onwarn: function (message) {
+        "onwarn": function (message) {
             if (D3_WARNING.test(message)) {}
         },
         plugins: [

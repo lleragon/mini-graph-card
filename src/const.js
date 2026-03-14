@@ -1,3 +1,9 @@
+import {name, version} from "../package.json";
+
+const CARD_NAME = name
+const CARD_NAME_READABLE = name.replace('-', " ").replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+const CARD_VERSION = version
+
 const FONT_SIZE = 14;
 const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
@@ -78,6 +84,9 @@ const V = 2;
 const ONE_HOUR = 1000 * 3600;
 
 export {
+    CARD_NAME,
+    CARD_NAME_READABLE,
+    CARD_VERSION,
     FONT_SIZE,
     FONT_SIZE_HEADER,
     MAX_BARS,

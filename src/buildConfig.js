@@ -1,5 +1,5 @@
 import {DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS} from "./const";
-import {log} from "./utils";
+import {logWarning} from "./utils";
 import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
@@ -65,7 +65,7 @@ function buildConfig(rawConfig) {
     
     if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
-        log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
+        logWarning(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
     }
     
     conf.hash = SparkMD5.hash(JSON.stringify(conf));
