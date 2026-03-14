@@ -1,4 +1,4 @@
-import {DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS, URL_DOCS} from "./const";
+import {DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS} from "./const";
 import {log} from "./utils";
 import SparkMD5 from "spark-md5";
 
@@ -117,7 +117,7 @@ function interpolateStops(stops) {
         return stops;
     }
     if (stops[0].value == null || stops[stops.length - 1].value == null) {
-        throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
+        throw new Error(`The first and last thresholds must have a set "value".`);
     }
     
     let leftValuedIndex = 0;

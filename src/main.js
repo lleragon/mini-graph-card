@@ -700,7 +700,7 @@ class ExtremaGraphCard extends LitElement {
         if (newStateHistory[0] && newStateHistory[0].length > 0) {
             /**
              * hack because HA doesn't return anything if skipInitialState is false
-             * when retrieving for attributes so we retrieve it and we remove it.*
+             * when retrieving for attributes so we retrieve it, and we remove it.*
              */
             if (this.config.entity_attribute && skipInitialState) {
                 newStateHistory[0].shift();
