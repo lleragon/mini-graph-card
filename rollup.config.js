@@ -3,7 +3,6 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
-import {literalsHtmlCssMinifier} from '@literals/rollup-plugin-html-css-minifier';
 import pkg from './package.json' with {type: 'json'};
 
 const dev = process.env.ROLLUP_WATCH;
@@ -27,7 +26,6 @@ export default [
             if (D3_WARNING.test(message)) {}
         },
         plugins: [
-            //literalsHtmlCssMinifier(), TODO Breaks font_size inline style
             nodeResolve({}),
             commonjs(),
             json(),
