@@ -20,7 +20,7 @@
     "@babel/core": "^7.29.0",
     "@babel/plugin-proposal-decorators": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
-    "@biomejs/biome": "2.4.4",
+    "@literals/rollup-plugin-html-css-minifier": "^3.0.1",
     "@rollup/plugin-babel": "^6.1.0",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
@@ -28,13 +28,10 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@types/spark-md5": "^3.0.5",
     "rollup": "^4.58.0",
-    "rollup-plugin-serve": "^3.0.0",
-    "@literals/rollup-plugin-html-css-minifier": "^3.0.1"
+    "rollup-plugin-serve": "^3.0.0"
   },
   "scripts": {
-    "build_OLD": "npm install && ncu && npm run lint && npm run rollup",
     "build": "npm install && ncu && npm run rollup",
-    "lint": "npx @biomejs/biome check",
     "rollup": "rollup -c",
     "watch": "npm install && rollup -c --watch",
     "update": "ncu -i"
