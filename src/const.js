@@ -17,6 +17,9 @@ const UPDATE_PROPS = [
 const DEFAULT_CONF = {
     entity: undefined,
     entity_attribute: undefined,
+    name: undefined,
+    icon: undefined,
+    unit: undefined,
     font_size: 100,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
@@ -37,6 +40,8 @@ const DEFAULT_CONF = {
     update_interval: 0,
     align_icon: "right",
     align_state: "left",
+    align_header: undefined,
+    group: false,
     decimals: undefined,
     lower_bound: undefined,
     upper_bound: undefined,

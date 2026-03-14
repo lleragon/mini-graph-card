@@ -11,147 +11,62 @@ TO REMOVE
     this.length = []; //Only used for animation, adapt dev branch?
     secondary y-axis
 
+todo readme update images and examples
+
 NEW CONFIG
 ------------------------------------------------------------------------------------------------------------------------
+entity: undefined
+entity_attribute: undefined
+name: undefined
+unit: undefined
+icon: undefined
+decimals: undefined,
 
-entity: undefined                     //NEW
-entity_attribute: undefined         //NEW
-font_size: 100
-font_size_header: 14
-height: 100                 //changed default
-hours_to_show: 24
-points_per_hour: 1          //changed default
-aggregate_func: "avg"
-group_by: "interval"
-color_thresholds_transition: "smooth"
-color: "var(--accent-color)"            //NEW  colorcode or rgb or thresholds
+graph_type: "line",       //todo readme desc
 line_width: 5
 bar_spacing: 4
 smoothing: true
-//state_map:
-cache: true
-cache_compress: false       //WARNING CAUSES HAVY CPU LOAD AT FREUENT UPDATES
-value_factor: 1                 //changed to be a true "factor"
 logarithmic: false                  //TODO TEST
-update_interval: 0  //zero or less disables //TODO TEST
-tap_action:
-    action: "more-info"
-graph_type: "line", //line || bar || none       //NEW
-decimals: undefined,
+color: "var(--accent-color)"
+color_thresholds_transition: "smooth"
+
+hours_to_show: 24
+points_per_hour: 1
+aggregate_func: "avg"
+group_by: "interval"
+update_interval: 0   //TODO TEST
+
+font_size: 100
+font_size_header: 14
+height: 100
 align_icon: right
 align_state: left
+align_header:  undefined     //TODO TEST
+group: false
+
 lower_bound: undefined
 upper_bound: undefined
 min_bound_range: undefined
+value_factor: 1
+//state_map:
 
-//TODO TEST FORM HERE
-
-//missing in default config
-//align_header:
-//icon:
-//name:
-//unit:
-//group:
-//value_factor:
-
-
+cache: true
+cache_compress: false       //WARNING CAUSES HAVY CPU LOAD AT FREUENT UPDATES
+tap_action:
+    action: "more-info"
 
 
 show:
     name: true
     icon: true
     state: true                     //TODO WORKS BUT THROWS ERRORS
+    line: true
     fill: true
     points: "hover"
     extrema: false
     average:false
     labels: "hover"
-    line: true                      //NEW
-    icon_adaptive_color: false
     name_adaptive_color: false
+    icon_adaptive_color: false
     state_adaptive_color: false
     loading_indicator: true          //TODO TEST
-
-
-ORIG KONFIG:
---------------------------------------------------------------------------------------------------------------
-
-type: custom:extrema-graph-card
-entity:
-font_size: 14
-font_size_header: 14
-height: 100
-hours_to_show: 24
-points_per_hour: 0.5
-aggregate_func: "avg"
-group_by: "interval"
-//line_color:
-//color_thresholds
-color_thresholds_transition: "smooth"
-line_width: 5
-bar_spacing: 4
-smoothing: true
-//state_map:
-cache: true
-cache_compress: false
-value_factor: 0
-//tap_action:
-
-//missing in default config
-//align_icon:
-//align_state:
-//align_header:
-//icon:
-//icon_image:
-//name:
-//unit:
-//group:
-//update_interval:
-//decimals:
-//lower_bound:
-//upper_bound:
-//min_bound_range:
-//lower_bound_secondary:
-//upper_bound_secondary:
-//min_bound_range_secondary:
-//value_factor:
-//logarithmic:
-
-show:
-   name: true
-    icon: true
-    state: true
-    graph: "line"
-    fill: true
-    points: "hover"
-    legend: true       //REMOVED
-    extrema: false
-    labels: "hover"
-    labels_secondary: "hover"
-
-    //missing in default config
-    //average:false
-    //name_adaptive_color: false
-    //icon_adaptive_color: false
-    //loading_indicator: true
-
-//missing in default config
-entities:
-    - entity:
-      attribute
-      name
-      color
-      unit
-      aggregate_func
-      show_state
-      show_legend_state
-      show_indicator
-      show_graph
-      show_line
-      show_fill
-      show_points
-      show_legend
-      state_adaptive_color
-      y_axis
-      fixed_value
-      smoothing
