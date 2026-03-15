@@ -88,12 +88,12 @@ const style = css`
     .name {
         align-items: center;
         min-width: 0;
-        letter-spacing: var(--mcg-title-letter-spacing, normal);
+        letter-spacing: normal;
     }
 
     .name > span {
         font-size: 1.2em;
-        font-weight: var(--mcg-title-font-weight, 500);
+        font-weight: 500);
         max-height: 1.4em;
         min-height: 1.4em;
         opacity: .65;

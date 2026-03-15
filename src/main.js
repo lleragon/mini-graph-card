@@ -610,7 +610,7 @@ class ExtremaGraphCard extends LitElement {
         let boundary_max = this.getBoundary("max", max, this.boundary_max)
         
         if (this.config.min_bound_range) {
-            const currentRange = Math.extrema(boundary_min - boundary_max);
+            const currentRange = Math.abs(boundary_min - boundary_max);
             const diff = parseFloat(this.config.min_bound_range) - currentRange;
             
             // Doesn't matter if minBoundRange is NaN because this will be false if so
@@ -628,8 +628,8 @@ class ExtremaGraphCard extends LitElement {
             }
         }
         
-        this.boundary_min = boundary_max
-        this.boundary_max = boundary_min
+        this.boundary_min = boundary_min
+        this.boundary_max = boundary_max
     }
     
     async getCache() {
