@@ -466,7 +466,7 @@ class ExtremaGraphCard extends LitElement {
                 <span class="info__item__type">${entry.type}</span>
                 <span class="info__item__value">${this.computeState(entry.state)}</span>
                 <span class="info__item__time">
-                            ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ""}
+                            ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.timeFormat, this._hass.language) : ""}
                 </span>
             </div>`
         )
@@ -516,9 +516,7 @@ class ExtremaGraphCard extends LitElement {
     
     computeState(rawState) {
         if (this.config.state_map.length > 0) {
-            const stateMap = Number.isInteger(rawState)
-                ? this.config.state_map[rawState]
-                : this.config.state_map.find((state) => state.value === rawState);
+            const stateMap = this.config.state_map.find((state) => state.value === rawState);
             
             if (stateMap) {
                 return stateMap.label;
@@ -771,7 +769,7 @@ class ExtremaGraphCard extends LitElement {
         }
     }
     
-
+    
     convertState(res) {
         const resultIndex = this.config.state_map.findIndex((s) => s.value === res.state);
         if (resultIndex === -1) {
@@ -798,7 +796,7 @@ class ExtremaGraphCard extends LitElement {
         return date;
     }
     
-     //TODO FROM HERE
+    //TODO FROM HERE
     setNextUpdate() {
         if (this.config.update_interval <= 0) {
             const interval = 1 / this.config.points_per_hour;

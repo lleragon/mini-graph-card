@@ -68,7 +68,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | upper_bound             |           number *or* string            |                       | Set a fixed upper bound for the graph axis. String value starting with ~ (e.g. `~50`) specifies soft bound.                                            |
 | min_bound_range         |                 number                  |                       | Applied after everything, makes sure there's a minimum range that the axis will have. Useful for not making small changes look large because of scale. |
 | value_factor            |                 number                  |           1           | Up- or Downscale the value (e.g. convert Watts to kilo Watts).                                                                                         |
-| state_map               |  [state map object](#state-map-object)  |                       | List of entity states to convert (order matters as position becomes a value on the graph).                                                             |
+| state_map               |  [state map object](#state-map-object)  |                       | List of entity states to convert.                                                                                                                      |
 |                         |                                         |                       |                                                                                                                                                        |
 | cache                   |                 boolean                 |        `true`         | Enable/disable local caching of history data.                                                                                                          |
 | cache_compress          |                 boolean                 |        `false`        | Compress local cache date (only usefull if localStorage quota is exeeded)                                                                              |  
@@ -165,10 +165,13 @@ As a shorthand, you can just use a color string for the stops that you want inte
 
 #### State map object
 
-| Name                   |  Type  |    Default    | Description                                            |
-|------------------------|:------:|:-------------:|--------------------------------------------------------|
-| value ***(required)*** | string |               | Value to convert.                                      |
-| label                  | string | same as value | String to show as label (if the value is not precise). |
+A list of entity states to convert.
+Order matters as position becomes a value on the graph.
+
+| Name  |  Type  | Default | Description              |
+|-------|:------:|:-------:|--------------------------|
+| value | string |         | Value to convert.        |
+| label | string |         | String to show as label. |
 
 ### Aggregate functions
 
@@ -416,9 +419,9 @@ line_width: 2
 smoothing: false
 state_map:
   - value: "off"
-    label: Clear
+    label: "Clear"
   - value: "on"
-    label: Detected
+    label: "Detected"
 ```
 
 #### Showing additional info on the card

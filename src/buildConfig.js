@@ -1,5 +1,5 @@
 import {AGGREGATE_FUNCTIONS, CARD_NAME, DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS} from "./const";
-import {logWarning} from "./utils";
+import {logWarning, isNumber, isBool, isUndef, isInt, isString} from "./utils";
 import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
@@ -25,7 +25,7 @@ function buildConfig(rawConfig) {
         if (!(key in DEFAULT_CONF_SHOW)) throw new Error(`Unknown configuration key: show.${key}`);
     }
     
-    //Check configuration values
+    //Verify configuration values
     //todo check readme datatypes and limits
     if (!isString(conf.entity)) throw new Error(`Please provide an entity.`);
     if (!isUndef(conf.decimals) && !isInt(conf.decimals, 0, 10)) throw new InvalidConfValError("decimals");
@@ -56,7 +56,7 @@ function buildConfig(rawConfig) {
     if (!isUndef(conf.lower_bound) && !isNumber(conf.lower_bound)) throw new InvalidConfValError("upper_bound");
     if (!isUndef(conf.min_bound_range) && !isNumber(conf.min_bound_range, 1)) throw new InvalidConfValError("min_bound_range");
     if (!isNumber(conf.value_factor) || conf.value_factor === 0) throw new InvalidConfValError("value_factor");
-    //todo state_map
+    verifyStateMap()
     //-----
     if (!isBool(conf.cache)) throw new InvalidConfValError("cache");
     if (!isBool(conf.cache_compress)) throw new InvalidConfValError("cache_compress");
@@ -77,21 +77,10 @@ function buildConfig(rawConfig) {
     }
     //Scale font_size
     conf.font_size = ((conf.font_size / 100) * FONT_SIZE).toFixed(2);
-    
-    //todo from here
-    conf.state_map.forEach((state, i) => {
-        // convert string values to objects
-        if (typeof state === "string") conf.state_map[i] = {value: state, label: state};
-        // make sure label is set
-        conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
-    });
-    
-    
-    const additional = conf.hours_to_show > 24 ? {day: "numeric", weekday: "short"} : {};
-    const hourFormat = {hourCycle: "h23"};
-    conf.format = {...hourFormat, ...additional};
-    
-    
+    //Generate time format for extrema and average info (show or hide date)
+    conf.timeFormat = {hourCycle: "h23"};
+    if (conf.hours_to_show > 24) conf.timeFormat = {...conf.timeFormat, day: "numeric", weekday: "short"};
+    //Limit number of bars to show
     if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
         logWarning(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
@@ -109,25 +98,15 @@ class InvalidConfValError extends Error {
     }
 }
 
-function isString(value) {
-    return (typeof value === "string");
+
+function verifyStateMap(rawStateMap) {
+    if (!Array.isArray(rawStateMap)) throw new InvalidConfValError("state_map");
+    
+    rawStateMap.forEach((state, i) => {
+        if (!('label' in state && 'value' in state)) throw new InvalidConfValError("state_map");
+    });
 }
 
-function isNumber(value, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
-    return (typeof value === "number" && value >= min && value <= max);
-}
-
-function isInt(value, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
-    return (Number.isInteger(value) && value >= min && value <= max);
-}
-
-function isUndef(value) {
-    return (typeof value === "undefined");
-}
-
-function isBool(value) {
-    return (typeof value === "boolean");
-}
 
 function computeThresholds(stops, smooth) {
     const valuedStops = interpolateStops(stops);

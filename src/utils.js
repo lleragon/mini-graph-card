@@ -16,4 +16,38 @@ const logWarning = (message) => {
     console.warn(`${CARD_NAME}: ${message}`);
 };
 
-export {getMin, getAvg, getMax, getTime, getMilli, compress, decompress, logWarning};
+function isString(value) {
+    return (typeof value === "string");
+}
+
+function isNumber(value, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
+    return (typeof value === "number" && value >= min && value <= max);
+}
+
+function isInt(value, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
+    return (Number.isInteger(value) && value >= min && value <= max);
+}
+
+function isUndef(value) {
+    return (typeof value === "undefined");
+}
+
+function isBool(value) {
+    return (typeof value === "boolean");
+}
+
+export {
+    getMin,
+    getAvg,
+    getMax,
+    getTime,
+    getMilli,
+    compress,
+    decompress,
+    logWarning,
+    isString,
+    isNumber,
+    isInt,
+    isUndef,
+    isBool,
+};
