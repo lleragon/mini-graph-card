@@ -3,9 +3,7 @@ import {name, version} from "../package.json";
 const CARD_NAME = name
 const CARD_NAME_READABLE = name.replace('-', " ").replace(/(^\w|\s\w)/g, m => m.toUpperCase());
 const CARD_VERSION = version
-
 const FONT_SIZE = 14;
-const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
 
 const UPDATE_PROPS = [
@@ -33,7 +31,7 @@ const DEFAULT_CONF = {
     smoothing: true,
     logarithmic: false,                  //TODO TEST
     color: "var(--accent-color)",
-    color_thresholds_transition: "smooth",
+    color_smooth_transition: true,
     
     hours_to_show: 24,
     points_per_hour: 1,
@@ -42,7 +40,7 @@ const DEFAULT_CONF = {
     update_interval: 0,             //TODO TEST
     
     font_size: 100,
-    font_size_header: FONT_SIZE_HEADER,
+    font_size_header: 14,
     height: 100,
     align_icon: "right",
     align_state: "left",
@@ -78,6 +76,18 @@ const DEFAULT_CONF_SHOW = {
     loading_indicator: true,          //TODO TEST
 };
 
+const AGGREGATE_FUNCTIONS = [
+    'avg',
+    'median',
+    'max',
+    'min',
+    'first',
+    'last',
+    'sum',
+    'delta',
+    'diff',
+]
+
 const X = 0;
 const Y = 1;
 const V = 2;
@@ -88,11 +98,11 @@ export {
     CARD_NAME_READABLE,
     CARD_VERSION,
     FONT_SIZE,
-    FONT_SIZE_HEADER,
     MAX_BARS,
     UPDATE_PROPS,
     DEFAULT_CONF,
     DEFAULT_CONF_SHOW,
+    AGGREGATE_FUNCTIONS,
     X,
     Y,
     V,

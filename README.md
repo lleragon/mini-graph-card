@@ -32,69 +32,69 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 
 #### Card options
 
-| Name                        |             Type              |        Default        | Description                                                                                                                                            |
-|-----------------------------|:-----------------------------:|:---------------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type ***(required)***       |            string             |                       | `custom:mini-graph-card`                                                                                                                               
-| entity ***(required)***     |            string             |                       | Entity id of the sensor.                                                                                                                               
-| attribute                   |            string             |                       | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state                           
-| name                        |            string             |                       | Set a custom name, defaults to entity's friendly_name.                                                                                                 
-| unit                        |            string             |                       | Set a custom unit of measurement (`''` value for an empty unit).                                                                                       
-| icon                        |            string             |                       | Set a custom icon from any of the available mdi icons.                                                                                                 
-| decimals                    |            integer            |                       | Specify the exact number of decimals to show.                                                                                                          
-|                             |                               |                       |                                                                                                                                                        |
-| graph_type                  |            string             |        `line`         | Display style for the graph, `line`, `bar` or `none`. If set to `bar` a maximum of `96` bars will be displayed.                                        |
-| line_width                  |            number             |          `5`          | Set the thickness of the graph line.                                                                                                                   
-| bar_spacing                 |            number             |          `4`          | Set the spacing between bars in bar graph.                                                                                                             
-| smoothing                   |            boolean            |        `true`         | Whether to make graph line smooth.                                                                                                                     
-| logarithmic                 |            boolean            |        `false`        | Use a Logarithmic scale for the graph                                                                                                                  
-| color                       | string *or* line color object | `var(--accent-color)` | Set a custom color for the graph. Either a fixed color or a dynamic color depending on the state                                                       |
-| color_thresholds_transition |            string             |       `smooth`        | Dynaimc color thresholds transition, `smooth` or `hard`.                                                                                               
-|                             |                               |                       |                                                                                                                                                        |
-| hours_to_show               |            integer            |         `24`          | Specify how many hours of history the graph should present.                                                                                            
-| points_per_hour             |            number             |          `1`          | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.                        
-| aggregate_func              |            string             |         `avg`         | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.                                                           
-| group_by                    |            string             |      `interval`       | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.                                                                                
-| update_interval             |            number             |          `0`          | Specify a custom update interval of the history data (in seconds), Set to zero to update automatically on every state change.                          
-|                             |                               |                       |                                                                                                                                                        |
-| font_size                   |            number             |         `100`         | Adjust the font size of the state, as percentage of the original size.                                                                                 
-| font_size_header            |            number             |         `14`          | Adjust the font size of the header, size in pixels.                                                                                                    
-| height                      |            number             |         `100`         | Set a custom height of the graph.                                                                                                                      
-| align_header                |            string             |                       | Set the alignment of the header, `left`, `right`, `center` or `default`.                                                                               
-| align_icon                  |            string             |        `right`        | Set the alignment of the icon, `left`, `right` or `state`.                                                                                             
-| align_state                 |            string             |        `left`         | Set the alignment of the current state, `left`, `right` or `center`.                                                                                   
-| group                       |                 boolean                 |        `false`        | Disable paddings and box-shadow, useful when nesting the card.
-|                             |                               |                       |                                                                                                                                                        |
-| lower_bound                 |      number *or* string       |                       | Set a fixed lower bound for the graph axis. String value starting with ~ (e.g. `~50`) specifies soft bound.                                            
-| upper_bound                 |      number *or* string       |                       | Set a fixed upper bound for the graph axis. String value starting with ~ (e.g. `~50`) specifies soft bound.                                            
-| min_bound_range             |            number             |                       | Applied after everything, makes sure there's a minimum range that the axis will have. Useful for not making small changes look large because of scale. 
-| value_factor                |                 number                  |           1           | Up- or Downscale the value (e.g. convert Watts to kilo Watts).                                               
-| state_map                   |  [state map object](#state-map-object)  |                       | List of entity states to convert (order matters as position becomes a value on the graph).                                                             
-|                             |                                         |                       |                                                                                                                                                        |
-| cache                       |                 boolean                 |        `true`         | Enable/disable local caching of history data.                                                                                                          
-| cache_compress              |                    boolean                         |        `false`        | Compress local cache date (only usefull if localStorage quota is exeeded)                                                                              |  
-| tap_action                  | [action object](#action-object-options) |                       | Action on click/tap.
-|                             |                                         |                       |                     |
-| show                        |                  list                   |                       | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
+| Name                    |                  Type                   |        Default        | Description                                                                                                                                            |
+|-------------------------|:---------------------------------------:|:---------------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type ***(required)***   |                 string                  |                       | `custom:mini-graph-card`                                                                                                                               |
+| entity ***(required)*** |                 string                  |                       | Entity id of the sensor.                                                                                                                               |
+| attribute               |                 string                  |                       | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state                           |
+| name                    |                 string                  |                       | Set a custom name, defaults to entity's friendly_name.                                                                                                 |
+| unit                    |                 string                  |                       | Set a custom unit of measurement (`''` value for an empty unit).                                                                                       |
+| icon                    |                 string                  |                       | Set a custom icon from any of the available mdi icons.                                                                                                 |
+| decimals                |                 integer                 |                       | Specify the exact number of decimals to show.                                                                                                          |
+|                         |                                         |                       |                                                                                                                                                        |
+| graph_type              |                 string                  |        `line`         | Display style for the graph, `line`, `bar` or `none`. If set to `bar` a maximum of `96` bars will be displayed.                                        |
+| line_width              |                 number                  |          `5`          | Set the thickness of the graph line.                                                                                                                   |
+| bar_spacing             |                 number                  |          `4`          | Set the spacing between bars in bar graph.                                                                                                             |
+| smoothing               |                 boolean                 |        `true`         | Whether to make graph line smooth.                                                                                                                     |
+| logarithmic             |                 boolean                 |        `false`        | Use a Logarithmic scale for the graph                                                                                                                  |
+| color                   |      string *or* line color object      | `var(--accent-color)` | Set a custom color for the graph. Either a fixed color or a dynamic color depending on the state                                                       |
+| color_smooth_transition |                 boolean                 |        `true`         | Smooth or hard transition between Dynaimc color thresholds.                                                                                            |
+|                         |                                         |                       |                                                                                                                                                        |
+| hours_to_show           |                 integer                 |         `24`          | Specify how many hours of history the graph should present.                                                                                            |
+| points_per_hour         |                 number                  |          `1`          | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.                        |
+| aggregate_func          |                 string                  |         `avg`         | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.                                                           |
+| group_by                |                 string                  |      `interval`       | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.                                                                                |
+| update_interval         |                 number                  |          `0`          | Specify a custom update interval of the history data (in seconds), Set to zero to update automatically on every state change.                          |
+|                         |                                         |                       |                                                                                                                                                        |
+| font_size               |                 number                  |         `100`         | Adjust the font size of the state, as percentage of the original size.                                                                                 |
+| font_size_header        |                 number                  |         `14`          | Adjust the font size of the header, size in pixels.                                                                                                    |
+| height                  |                 number                  |         `100`         | Set a custom height of the graph.                                                                                                                      |
+| align_header            |                 string                  |                       | Set the alignment of the header, `left`, `right`, `center` or `default`.                                                                               |
+| align_icon              |                 string                  |        `right`        | Set the alignment of the icon, `left`, `right` or `state`.                                                                                             |
+| align_state             |                 string                  |        `left`         | Set the alignment of the current state, `left`, `right` or `center`.                                                                                   |
+| group                   |                 boolean                 |        `false`        | Disable paddings and box-shadow, useful when nesting the card.                                                                                         |
+|                         |                                         |                       |                                                                                                                                                        |
+| lower_bound             |           number *or* string            |                       | Set a fixed lower bound for the graph axis. String value starting with ~ (e.g. `~50`) specifies soft bound.                                            |
+| upper_bound             |           number *or* string            |                       | Set a fixed upper bound for the graph axis. String value starting with ~ (e.g. `~50`) specifies soft bound.                                            |
+| min_bound_range         |                 number                  |                       | Applied after everything, makes sure there's a minimum range that the axis will have. Useful for not making small changes look large because of scale. |
+| value_factor            |                 number                  |           1           | Up- or Downscale the value (e.g. convert Watts to kilo Watts).                                                                                         |
+| state_map               |  [state map object](#state-map-object)  |                       | List of entity states to convert (order matters as position becomes a value on the graph).                                                             |
+|                         |                                         |                       |                                                                                                                                                        |
+| cache                   |                 boolean                 |        `true`         | Enable/disable local caching of history data.                                                                                                          |
+| cache_compress          |                 boolean                 |        `false`        | Compress local cache date (only usefull if localStorage quota is exeeded)                                                                              |  
+| tap_action              | [action object](#action-object-options) |                       | Action on click/tap.                                                                                                                                   |
+|                         |                                         |                       |                                                                                                                                                        |
+| show                    |                  list                   |                       | List of UI elements to display/hide, for available items see [available show options](#available-show-options).                                        |
 
 #### Available show options
 
 All properties are optional.
 
-| Name                | Default |          Options           | Description                                                           |
-|---------------------|:-------:|:--------------------------:|-----------------------------------------------------------------------|
-| name                | `true`  |      `true` / `false`      | Display name.                                                         
-| icon                | `true`  |      `true` / `false`      | Display icon.                                                         
-| state               | `true`  | `true` / `false` / `last`  | Display current state. `last` will show the last graph point's value. 
-| line                | `true`  |      `true` / `false`                       | Display the line graph line.                                          |
-| fill                | `true`  | `true` / `false` / `fade`  | Display the line graph fill.                                          
-| points              | `hover` | `true` / `false` / `hover` | Display graph data points.                                            
-| extrema             | `false` |      `true` / `false`      | Display max/min information.                                          
-| average             | `false` |      `true` / `false`      | Display average information.                                          
-| labels              | `hover` | `true` / `false` / `hover` | Display Y-axis labels.                                                
-| name_adaptive_color | `false` |      `true` / `false`      | Make the name color adapt with the primary entity color.              
-| icon_adaptive_color | `false` |      `true` / `false`      | Make the icon color adapt with the primary entity color.              
-| state_adaptive_color    | `false`  |    `true` / `false`     | Make the color of the state adapt to the entity color.
-| loading_indicator   | `true`  |      `true` / `false`      | Show loading indicator while attempting to retrieve a history.        
+| Name                 | Default |          Options           | Description                                                           |
+|----------------------|:-------:|:--------------------------:|-----------------------------------------------------------------------|
+| name                 | `true`  |      `true` / `false`      | Display name.                                                         |
+| icon                 | `true`  |      `true` / `false`      | Display icon.                                                         |
+| state                | `true`  | `true` / `false` / `last`  | Display current state. `last` will show the last graph point's value. |
+| line                 | `true`  |      `true` / `false`      | Display the line graph line.                                          |
+| fill                 | `true`  | `true` / `false` / `fade`  | Display the line graph fill.                                          |
+| points               | `hover` | `true` / `false` / `hover` | Display graph data points.                                            |
+| extrema              | `false` |      `true` / `false`      | Display max/min information.                                          |
+| average              | `false` |      `true` / `false`      | Display average information.                                          |
+| labels               | `hover` | `true` / `false` / `hover` | Display Y-axis labels.                                                |
+| name_adaptive_color  | `false` |      `true` / `false`      | Make the name color adapt with the primary entity color.              |
+| icon_adaptive_color  | `false` |      `true` / `false`      | Make the icon color adapt with the primary entity color.              |
+| state_adaptive_color | `false` |      `true` / `false`      | Make the color of the state adapt to the entity color.                |
+| loading_indicator    | `true`  |      `true` / `false`      | Show loading indicator while attempting to retrieve a history.        |
 
 #### Line color object
 
@@ -102,8 +102,8 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name                                                                                                   |  Type  | Default | Description                                   |
 |--------------------------------------------------------------------------------------------------------|:------:|:-------:|-----------------------------------------------|
-| value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |         | The threshold for the color stop.             
-| color ***(required)***                                                                                 | string |         | Color in 6 digit hex format (e.g. `#008080`). 
+| value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |         | The threshold for the color stop.             |
+| color ***(required)***                                                                                 | string |         | Color in 6 digit hex format (e.g. `#008080`). |
 
 ##### Line color interpolation of stop values
 
@@ -156,19 +156,19 @@ As a shorthand, you can just use a color string for the stops that you want inte
 
 | Name            |  Type  |   Default   |                           Options                           | Description                                                                              |
 |-----------------|:------:|:-----------:|:-----------------------------------------------------------:|------------------------------------------------------------------------------------------|
-| action          | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.                                                                       
-| entity          | string |             |                        Any entity id                        | Override default entity of `more-info`, when  `action` is defined as `more-info`.        
-| service         | string |             |                         Any service                         | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`. 
-| service_data    | object |             |                      Any service data                       | Service data to include with the service call (e.g. `entity_id: media_player.office`).   
-| navigation_path | string |             |                          Any path                           | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.        
-| url             | string |             |                           Any URL                           | URL to open when `action` is defined as `url`.                                           
+| action          | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.                                                                       |
+| entity          | string |             |                        Any entity id                        | Override default entity of `more-info`, when  `action` is defined as `more-info`.        |
+| service         | string |             |                         Any service                         | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`. |
+| service_data    | object |             |                      Any service data                       | Service data to include with the service call (e.g. `entity_id: media_player.office`).   |
+| navigation_path | string |             |                          Any path                           | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.        |
+| url             | string |             |                           Any URL                           | URL to open when `action` is defined as `url`.                                           |
 
 #### State map object
 
 | Name                   |  Type  |    Default    | Description                                            |
 |------------------------|:------:|:-------------:|--------------------------------------------------------|
-| value ***(required)*** | string |               | Value to convert.                                      
-| label                  | string | same as value | String to show as label (if the value is not precise). 
+| value ***(required)*** | string |               | Value to convert.                                      |
+| label                  | string | same as value | String to show as label (if the value is not precise). |
 
 ### Aggregate functions
 
@@ -178,15 +178,15 @@ conversion.
 
 | Name     | Description                                        |
 |----------|----------------------------------------------------|
-| `avg`    | Average                                            
-| `median` | Median                                             
-| `min`    | Minimum - lowest value                             
-| `max`    | Maximum - largest value                            
-| `first`  |
-| `last`   |
-| `sum`    |
-| `delta`  | Calculates difference between max and min value    
-| `diff`   | Calculates difference between first and last value 
+| `avg`    | Average                                            |
+| `median` | Median                                             |
+| `min`    | Minimum - lowest value                             |
+| `max`    | Maximum - largest value                            |
+| `first`  |                                                    |
+| `last`   |                                                    |
+| `sum`    |                                                    |
+| `delta`  | Calculates difference between max and min value    |
+| `diff`   | Calculates difference between first and last value |
 
 ### Theme variables
 
@@ -194,8 +194,8 @@ The following theme variables can be set in your HA theme to customize the appea
 
 | Name                     | Default | Description                                       |
 |--------------------------|:-------:|---------------------------------------------------|
-| mcg-title-letter-spacing |         | Letter spacing of the card title (`name` option). 
-| mcg-title-font-weight    |   500   | Font weight of the card title.                    
+| mcg-title-letter-spacing |         | Letter spacing of the card title (`name` option). |
+| mcg-title-font-weight    |   500   | Font weight of the card title.                    |
 
 ### Example usage
 

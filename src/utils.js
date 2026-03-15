@@ -13,7 +13,7 @@ const compress = (data) => LZString.compressToUint8Array(JSON.stringify(data));
 const decompress = (data) => (typeof data === "string" ? JSON.parse(LZString.decompressFromUint8Array(data)) : data);
 
 const logWarning = (message) => {
-    console.warn(CARD_NAME, ": ", message);
+    console.warn(`${CARD_NAME}: ${message}`);
 };
 
 export {getMin, getAvg, getMax, getTime, getMilli, compress, decompress, logWarning};

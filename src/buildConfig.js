@@ -1,40 +1,84 @@
-import {DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS} from "./const";
+import {AGGREGATE_FUNCTIONS, CARD_NAME, DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS} from "./const";
 import {logWarning} from "./utils";
 import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
-    //todo check for invalid entries
     //todo check all config entries and remove uneccessdary checks in main
     let conf;
     
+    //Expand configuration from Lovelace with default configuration
     conf = {
         ...DEFAULT_CONF,
         ...structuredClone(rawConfig),
-    }
-    conf.show = {
-        ...DEFAULT_CONF_SHOW,
-        ...structuredClone(rawConfig.show)
-    };
-    
-    if (typeof conf.entity !== "string") {
-        throw new Error(`Please provide a entity.`);
+        show: {
+            ...DEFAULT_CONF_SHOW,
+            ...structuredClone(rawConfig.show)
+        }
     }
     
-    if (typeof conf.font_size !== 'number' || conf.font_size < 1 && conf.font_size > 500) {
-        throw new Error(`Invalid value for font_size: ${conf.font_size}`);
+    //Search for unknown configuration options
+    for (let key of Object.keys(rawConfig)) {
+        if (key === "type" || key === "show") continue;
+        if (!(key in DEFAULT_CONF)) throw new Error(`Unknown configuration option: ${key}`);
     }
+    for (let key of Object.keys(rawConfig.show)) {
+        if (!(key in DEFAULT_CONF_SHOW)) throw new Error(`Unknown configuration key: show.${key}`);
+    }
+    
+    //Check configuration values
+    //todo check readme datatypes and limits
+    if (!isString(conf.entity)) throw new Error(`Please provide an entity.`);
+    if (!isUndef(conf.decimals) && !isInt(conf.decimals, 0, 10)) throw new InvalidConfValError("decimals");
+    //-----
+    if (conf.graph_type !== "line" && conf.graph_type === "bar" && conf.graph_type === "none") throw new InvalidConfValError("graph_type");
+    if (!isNumber(conf.line_width, 0.5, 10)) throw new InvalidConfValError("line_width");
+    if (!isNumber(conf.bar_spacing, 0.5, 10)) throw new InvalidConfValError("bar_spacing");
+    if (!isBool(conf.smoothing)) throw new InvalidConfValError("smoothing");
+    if (!isBool(conf.logarithmic)) throw new InvalidConfValError("logarithmic");
+    //todo color
+    if (!isBool(conf.color_smooth_transition)) throw new InvalidConfValError("color_smooth_transition");
+    //-----
+    if (!isInt(conf.hours_to_show, 1, 500)) throw new InvalidConfValError("hours_to_show");
+    if (!isNumber(conf.points_per_hour, 0.1, 60)) throw new InvalidConfValError("points_per_hour");
+    if (!AGGREGATE_FUNCTIONS.contains(conf.aggregate_func)) throw new InvalidConfValError("aggregate_func");
+    if (!["date", "hour", "interval"].contains(conf.group_by)) throw new InvalidConfValError("group_by");   //todo readme overrides points_per_hour
+    if (!isInt(conf.update_interval, 0, 3600)) throw new InvalidConfValError("update_interval");
+    //-----
+    if (!isInt(conf.font_size, 1, 500)) throw new InvalidConfValError("font_size");
+    if (!isNumber(conf.font_size_header, 1, 100)) throw new InvalidConfValError("font_size_header");
+    if (!isInt(conf.height, 10, 500)) throw new InvalidConfValError("height");
+    //todo align_icon
+    //todo align_state
+    //todo align_header
+    if (!isBool(conf.group)) throw new InvalidConfValError("group");
+    //-----
+    if (!isUndef(conf.lower_bound) && !isNumber(conf.lower_bound)) throw new InvalidConfValError("lower_bound");
+    if (!isUndef(conf.lower_bound) && !isNumber(conf.lower_bound)) throw new InvalidConfValError("upper_bound");
+    if (!isUndef(conf.min_bound_range) && !isNumber(conf.min_bound_range, 1)) throw new InvalidConfValError("min_bound_range");
+    if (!isNumber(conf.value_factor) || conf.value_factor === 0) throw new InvalidConfValError("value_factor");
+    //todo state_map
+    //-----
+    if (!isBool(conf.cache)) throw new InvalidConfValError("cache");
+    if (!isBool(conf.cache_compress)) throw new InvalidConfValError("cache_compress");
+    //todo tap_action
+    
+    
+    //Turn smoothing off for binary sensor
+    if (conf.smoothing && conf.entity.startsWith("binary_sensor.")) {
+        logWarning('Smoothing ist not compatible with binary sensors');
+        conf.smoothing = false;
+    }
+    //Compute dynamic line color object
+    if (Array.isArray(conf.color)) conf.color = computeThresholds(conf.color, conf.color_smooth_transition);
+    //Override points per hour to mach group_by function
+    if (conf.group_by === "date" || conf.group_by === "hour") {
+        logWarning('Configuration option group_by overrides option points_per_hour.');
+        conf.points_per_hour = (conf.group_by === "date") ? 1 / 24 : 1
+    }
+    //Scale font_size
     conf.font_size = ((conf.font_size / 100) * FONT_SIZE).toFixed(2);
     
-    if (typeof conf.value_factor !== 'number' || conf.value_factor === 0) {
-        throw new Error(`Invalid value for value_factor: ${conf.value_factor}`);
-    }
-    
-    if (conf.decimals !== undefined && (!Number.isInteger(conf.decimals) || conf.decimals < 0)) {
-        throw new Error(`Invalid value for decimals: ${conf.decimals}`);
-    }
-    
-    conf.smoothing = conf.smoothing && !conf.entity.startsWith("binary_sensor."); //turn smoothing off for binary sensor
-    
+    //todo from here
     conf.state_map.forEach((state, i) => {
         // convert string values to objects
         if (typeof state === "string") conf.state_map[i] = {value: state, label: state};
@@ -42,43 +86,54 @@ function buildConfig(rawConfig) {
         conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
     });
     
-    if (Array.isArray(conf.color)) {
-        // color threshold
-        conf.color = computeThresholds(conf.color, conf.color_thresholds_transition);
-    }
     
     const additional = conf.hours_to_show > 24 ? {day: "numeric", weekday: "short"} : {};
     const hourFormat = {hourCycle: "h23"};
     conf.format = {...hourFormat, ...additional};
     
-    // override points per hour to mach group_by function
-    switch (conf.group_by) {
-        case "date":
-            conf.points_per_hour = 1 / 24;
-            break;
-        case "hour":
-            conf.points_per_hour = 1;
-            break;
-        default:
-            break;
-    }
     
     if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
         logWarning(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
     }
     
-    conf.hash = SparkMD5.hash(JSON.stringify(conf));
-    
+    conf.hash = SparkMD5.hash(JSON.stringify(conf))
+    console.debug(`${CARD_NAME}: Configuration ${this.config}`);
     return conf;
 }
 
+class InvalidConfValError extends Error {
+    constructor(message) {
+        super("Invalid value for " + message);
+        this.name = "InvalidConfValError";
+    }
+}
 
-function computeThresholds(stops, type) {
+function isString(value) {
+    return (typeof value === "string");
+}
+
+function isNumber(value, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
+    return (typeof value === "number" && value >= min && value <= max);
+}
+
+function isInt(value, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
+    return (Number.isInteger(value) && value >= min && value <= max);
+}
+
+function isUndef(value) {
+    return (typeof value === "undefined");
+}
+
+function isBool(value) {
+    return (typeof value === "boolean");
+}
+
+function computeThresholds(stops, smooth) {
     const valuedStops = interpolateStops(stops);
     valuedStops.sort((a, b) => b.value - a.value);
     
-    if (type === "smooth") {
+    if (smooth) {
         return valuedStops;
     } else {
         return [].concat(

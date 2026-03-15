@@ -77,7 +77,6 @@ class ExtremaGraphCard extends LitElement {
     //card config update from home assistant
     setConfig(rawConfig) {
         this.config = buildConfig(rawConfig);
-        console.debug(CARD_NAME, ": CONFIG=", this.config);
         
         if (this._hass) this.hass = this._hass; //Trigger data update
         
