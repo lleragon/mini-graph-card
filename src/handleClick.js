@@ -1,4 +1,4 @@
-export default (node, hass, config, actionConfig, entityId) => {
+export default (node, hass, actionConfig, entityId) => {
     let e;
     switch (actionConfig.action) {
         case "more-info": {

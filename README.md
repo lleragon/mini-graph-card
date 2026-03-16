@@ -94,7 +94,6 @@ All properties are optional.
 | name_adaptive_color  |       boolean        | `false` | Make the name color adapt with the primary entity color.              |
 | icon_adaptive_color  |       boolean        | `false` | Make the icon color adapt with the primary entity color.              |
 | state_adaptive_color |       boolean        | `false` | Make the color of the state adapt to the entity color.                |
-| loading_indicator    |       boolean        | `true`  | Show loading indicator while attempting to retrieve a history.        |
 
 #### Dynamic color object
 

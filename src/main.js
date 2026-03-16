@@ -97,18 +97,14 @@ class ExtremaGraphCard extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         if (this.config.update_interval > 0) {
-            window.requestAnimationFrame(() => {
-                this.updateOnInterval();
-            });
+            window.requestAnimationFrame(() => {this.updateOnInterval();});
             this.interval = setInterval(() => this.updateOnInterval(), this.config.update_interval * 1000);
         }
     }
     
     //Lit -> Invoked when a component is removed from the document's DOM
     disconnectedCallback() {
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
+        if (this.interval) clearInterval(this.interval);
         super.disconnectedCallback();
     }
     
@@ -136,8 +132,8 @@ class ExtremaGraphCard extends LitElement {
         if (!this.entity) {
             return this.renderWarnings(`Entity not available: ${this.config.entity}`);
         }
-        if (!this.entity) {
-            return this.renderWarnings(`Internal hass object available: ${this.config.entity}`);
+        if (!this._hass) {
+            return this.renderWarnings(`Internal hass object not available: ${this.config.entity}`);
         }
         
         return html`
@@ -257,9 +253,9 @@ class ExtremaGraphCard extends LitElement {
     renderGraph() {
         let content;
         
-        if ((this.config.graph_type !== 'line') && (this.config.graph_type !== 'bar')) return "";
+        if (this.config.graph_type === 'none') return "";
         
-        if ((this.entity && (this.Graph._history !== undefined)) || this.config.show.loading_indicator !== true) {
+        if ((this.entity && (this.Graph._history !== undefined))) {
             content = html`
                 <div class="graph__container">
                     ${this.renderLabels()}
@@ -268,8 +264,7 @@ class ExtremaGraphCard extends LitElement {
                     </div>
                 </div> `;
         } else {
-            content = html`
-                <ha-spinner aria-label="Loading" size="small"></ha-spinner>`;
+            content = html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`;
         }
         
         return html`
@@ -419,7 +414,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     setTooltip(index, value) {
-        const {group_by, points_per_hour, hours_to_show, format} = this.config;
+        const {group_by, points_per_hour, hours_to_show, timeFormat} = this.config;
         
         // time units in milliseconds in this function
         const interval = getMilli(1 / points_per_hour);
@@ -436,9 +431,9 @@ class ExtremaGraphCard extends LitElement {
         const now = this.getEndDate();
         
         now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
-        const end = getTime(now, format, this._hass.language);
+        const end = getTime(now, timeFormat, this._hass.language);
         now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
-        const start = getTime(now, format, this._hass.language);
+        const start = getTime(now, timeFormat, this._hass.language);
         
         this.tooltip = {
             value,
@@ -466,7 +461,7 @@ class ExtremaGraphCard extends LitElement {
                 <span class="info__item__type">${entry.type}</span>
                 <span class="info__item__value">${this.computeState(entry.state)}</span>
                 <span class="info__item__time">
-                            ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.timeFormat, this._hass.language) : ""}
+                    ${entry.type !== "avg" ? getTime(new Date(entry.last_changed), this.config.timeFormat, this._hass.language) : ""}
                 </span>
             </div>`
         )
@@ -479,7 +474,7 @@ class ExtremaGraphCard extends LitElement {
     
     handlePopup(e, entity) {
         e.stopPropagation();
-        handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
+        handleClick(this, this._hass, this.config.tap_action, entity.entity_id || entity);
     }
     
     computeColor(inState) {

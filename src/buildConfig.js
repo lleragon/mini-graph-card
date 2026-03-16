@@ -3,7 +3,6 @@ import {isBool, isInt, isNumber, isString, isUndef, logWarning} from "./utils";
 import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
-    //todo remove uneccessdary config checks in main
     let conf;
     
     //Expand configuration from Lovelace with default configuration
@@ -64,68 +63,71 @@ function buildConfig(rawConfig) {
 //Verify configuration values
 function verifyConfig(conf) {
     if (!isString(conf.entity)) throw new Error(`Please provide an entity.`);
-    if (!isUndef(conf.decimals) && !isInt(conf.decimals, 0, 10)) throw new InvalidConfValError("decimals");
+    if (!isUndef(conf.decimals) && !isInt(conf.decimals, 0, 10)) throw new ConfValError("decimals");
     //-----
-    if (conf.graph_type !== "line" && conf.graph_type === "bar" && conf.graph_type === "none") throw new InvalidConfValError("graph_type");
-    if (!isNumber(conf.line_width, 0.5, 10)) throw new InvalidConfValError("line_width");
-    if (!isNumber(conf.bar_spacing, 0.5, 10)) throw new InvalidConfValError("bar_spacing");
-    if (!isBool(conf.smoothing)) throw new InvalidConfValError("smoothing");
-    if (!isBool(conf.logarithmic)) throw new InvalidConfValError("logarithmic");
-    if (!isString(conf.color) && !Array.isArray(conf.color)) throw new InvalidConfValError("color");
-    if (!isBool(conf.color_smooth_transition)) throw new InvalidConfValError("color_smooth_transition");
+    if (!["line", "bar", "none"].includes(conf.graph_type)) throw new ConfValError("graph_type");
+    if (!isNumber(conf.line_width, 0.5, 10)) throw new ConfValError("line_width");
+    if (!isNumber(conf.bar_spacing, 0.5, 10)) throw new ConfValError("bar_spacing");
+    if (!isBool(conf.smoothing)) throw new ConfValError("smoothing");
+    if (!isBool(conf.logarithmic)) throw new ConfValError("logarithmic");
+    if (!isString(conf.color) && !Array.isArray(conf.color)) throw new ConfValError("color");
+    if (!isBool(conf.color_smooth_transition)) throw new ConfValError("color_smooth_transition");
     //-----
-    if (!isInt(conf.hours_to_show, 1, 500)) throw new InvalidConfValError("hours_to_show");
-    if (!isNumber(conf.points_per_hour, 0.1, 60)) throw new InvalidConfValError("points_per_hour");
-    if (!AGGREGATE_FUNCTIONS.includes(conf.aggregate_func)) throw new InvalidConfValError("aggregate_func");
-    if (!["date", "hour", "interval"].includes(conf.group_by)) throw new InvalidConfValError("group_by");
-    if (!isInt(conf.update_interval, 0, 3600)) throw new InvalidConfValError("update_interval");
+    if (!isInt(conf.hours_to_show, 1, 500)) throw new ConfValError("hours_to_show");
+    if (!isNumber(conf.points_per_hour, 0.1, 60)) throw new ConfValError("points_per_hour");
+    if (!AGGREGATE_FUNCTIONS.includes(conf.aggregate_func)) throw new ConfValError("aggregate_func");
+    if (!["date", "hour", "interval"].includes(conf.group_by)) throw new ConfValError("group_by");
+    if (!isInt(conf.update_interval, 0, 3600)) throw new ConfValError("update_interval");
     //-----
-    if (!isInt(conf.font_size, 1, 500)) throw new InvalidConfValError("font_size");
-    if (!isNumber(conf.font_size_header, 1, 100)) throw new InvalidConfValError("font_size_header");
-    if (!isInt(conf.height, 10, 500)) throw new InvalidConfValError("height");
+    if (!isInt(conf.font_size, 1, 500)) throw new ConfValError("font_size");
+    if (!isNumber(conf.font_size_header, 1, 100)) throw new ConfValError("font_size_header");
+    if (!isInt(conf.height, 10, 500)) throw new ConfValError("height");
     //todo align_icon (dont forget readme)
     //todo align_state (dont forget readme)
     //todo align_header (dont forget readme)
-    if (!isBool(conf.group)) throw new InvalidConfValError("group");
+    if (!isBool(conf.group)) throw new ConfValError("group");
     //-----
-    if (!isUndef(conf.lower_bound) && !isNumber(conf.lower_bound)) throw new InvalidConfValError("lower_bound"); //todo check string option
-    if (!isUndef(conf.lower_bound) && !isNumber(conf.lower_bound)) throw new InvalidConfValError("upper_bound");//todo check string option
-    if (!isUndef(conf.min_bound_range) && !isNumber(conf.min_bound_range, 1)) throw new InvalidConfValError("min_bound_range");
-    if (!isNumber(conf.value_factor) || conf.value_factor === 0) throw new InvalidConfValError("value_factor");
+    verifyBound(conf.lower_bound, 'lower_bound');
+    verifyBound(conf.upper_bound, 'upper_bound');
+    if (!isUndef(conf.min_bound_range) && !isNumber(conf.min_bound_range, 1)) throw new ConfValError("min_bound_range");
+    if (!isNumber(conf.value_factor) || conf.value_factor === 0) throw new ConfValError("value_factor");
     verifyStateMap(conf.state_map);
     //-----
-    if (!isBool(conf.cache)) throw new InvalidConfValError("cache");
-    if (!isBool(conf.cache_compress)) throw new InvalidConfValError("cache_compress");
+    if (!isBool(conf.cache)) throw new ConfValError("cache");
+    if (!isBool(conf.cache_compress)) throw new ConfValError("cache_compress");
     //todo tap_action
     //-----
-    if (!isBool(conf.show.name)) throw new InvalidConfValError("show.name");
-    if (!isBool(conf.show.icon)) throw new InvalidConfValError("show.icon");
-    if (!isBool(conf.show.state)) throw new InvalidConfValError("show.state");
-    if (!isBool(conf.show.line)) throw new InvalidConfValError("show.line");
-    if (!isBool(conf.show.fill)) throw new InvalidConfValError("show.fill");
-    if (!isBool(conf.show.points) && conf.show.points !== 'hover') throw new InvalidConfValError("show.points");
-    if (!isBool(conf.show.extrema)) throw new InvalidConfValError("show.extrema");
-    if (!isBool(conf.show.average)) throw new InvalidConfValError("show.average");
-    if (!isBool(conf.show.labels) && conf.show.labels !== 'hover') throw new InvalidConfValError("show.labels");
-    if (!isBool(conf.show.name_adaptive_color)) throw new InvalidConfValError("show.name_adaptive_color");
-    if (!isBool(conf.show.icon_adaptive_color)) throw new InvalidConfValError("show.icon_adaptive_color");
-    if (!isBool(conf.show.state_adaptive_color)) throw new InvalidConfValError("show.state_adaptive_color");
-    if (!isBool(conf.show.loading_indicator)) throw new InvalidConfValError("show.loading_indicator");
-    
-    
+    if (!isBool(conf.show.name)) throw new ConfValError("show.name");
+    if (!isBool(conf.show.icon)) throw new ConfValError("show.icon");
+    if (!isBool(conf.show.state) && conf.show.state !== 'last') throw new ConfValError("show.state");
+    if (!isBool(conf.show.line)) throw new ConfValError("show.line");
+    if (!isBool(conf.show.fill) && conf.show.fill !== 'fade') throw new ConfValError("show.fill");
+    if (!isBool(conf.show.points) && conf.show.points !== 'hover') throw new ConfValError("show.points");
+    if (!isBool(conf.show.extrema)) throw new ConfValError("show.extrema");
+    if (!isBool(conf.show.average)) throw new ConfValError("show.average");
+    if (!isBool(conf.show.labels) && conf.show.labels !== 'hover') throw new ConfValError("show.labels");
+    if (!isBool(conf.show.name_adaptive_color)) throw new ConfValError("show.name_adaptive_color");
+    if (!isBool(conf.show.icon_adaptive_color)) throw new ConfValError("show.icon_adaptive_color");
+    if (!isBool(conf.show.state_adaptive_color)) throw new ConfValError("show.state_adaptive_color");
+}
+
+function verifyBound(rawBound, confOptName){
+    if (isUndef(rawBound) || isNumber(rawBound)) return;
+    if (isString(rawBound) && rawBound[0] === "~" && !isNaN(rawBound.substr(1))) return;
+    throw new ConfValError(confOptName);
 }
 
 function verifyStateMap(rawStateMap) {
-    if (!Array.isArray(rawStateMap)) throw new InvalidConfValError("state_map");
+    if (!Array.isArray(rawStateMap)) throw new ConfValError("state_map");
     
     rawStateMap.forEach((state, i) => {
-        if (!('label' in state && 'value' in state)) throw new InvalidConfValError("state_map");
+        if (!('label' in state && 'value' in state)) throw new ConfValError("state_map");
     });
 }
 
 function computeDynamicColor(colors, smooth) {
     colors.forEach(col => {
-        if (!('value' in col && 'color' in col)) throw new InvalidConfValError("color (color or value key is missing)");
+        if (!('value' in col && 'color' in col)) throw new ConfValError("color (color or value key is missing)");
     })
     
     colors.sort((a, b) => b.value - a.value);
@@ -146,10 +148,10 @@ function computeDynamicColor(colors, smooth) {
     }
 }
 
-class InvalidConfValError extends Error {
+class ConfValError extends Error {
     constructor(message) {
         super("Invalid value for " + message);
-        this.name = "InvalidConfValError";
+        this.name = "Configuration validation error";
     }
 }
 
