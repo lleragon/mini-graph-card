@@ -1,16 +1,34 @@
 import LZString from "lz-string";
 import {CARD_NAME} from "./const.js";
 
-const getMin = (arr, val) => arr.reduce((min, p) => (Number(p[val]) < Number(min[val]) ? p : min), arr[0]);
-const getAvg = (arr, val) => arr.reduce((sum, p) => sum + Number(p[val]), 0) / arr.length;
-const getMax = (arr, val) => arr.reduce((max, p) => (Number(p[val]) > Number(max[val]) ? p : max), arr[0]);
-const getTime = (date, extra, locale = "en-US") =>
-    date.toLocaleString(locale, {hour: "numeric", minute: "numeric", ...extra});
-const getMilli = (hours) => hours * 60 ** 2 * 10 ** 3;
+function getMinState(history) {
+    return history.reduce((min, p) => (p.state < min.state ? p : min), history[0]);
+}
 
-const compress = (data) => LZString.compressToUint8Array(JSON.stringify(data));
+function getAvgState(history) {
+    return history.reduce((sum, p) => (sum + p.state), 0) / history.length;
+}
 
-const decompress = (data) => (typeof data === "string" ? JSON.parse(LZString.decompressFromUint8Array(data)) : data);
+function getMaxState(history) {
+    return history.reduce((max, p) => (p.state > max.state ? p : max), history[0]);
+}
+
+function getTime(date, extra, locale = "en-US") {
+    return date.toLocaleString(locale, {hour: "numeric", minute: "numeric", ...extra})
+}
+
+function compress(data) {
+    return LZString.compress(JSON.stringify(data));
+}
+
+function decompress(data) {
+    try {
+        return JSON.parse(LZString.decompress(data));
+    } catch (error) {
+        logWarning('Decompress failed.', error);
+        return undefined;
+    }
+}
 
 const logWarning = (message) => {
     console.warn(`${CARD_NAME}: ${message}`);
@@ -37,11 +55,10 @@ function isBool(value) {
 }
 
 export {
-    getMin,
-    getAvg,
-    getMax,
+    getMinState,
+    getAvgState,
+    getMaxState,
     getTime,
-    getMilli,
     compress,
     decompress,
     logWarning,

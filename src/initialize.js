@@ -8,18 +8,16 @@ localForage.config({
     description: `${CARD_NAME} uses local caching for the entity history`,
 });
 
-localForage
-    .iterate((data, key) => {
-        const value = key.endsWith("-raw") ? data : decompress(data);
-        const start = new Date();
-        start.setHours(start.getHours() - value.hours_to_show);
-        if (data.version !== CARD_VERSION || new Date(value.last_fetched) < start) {
-            localForage.removeItem(key);
-        }
-    })
-    .catch((err) => {
-        logWarning("Purging has errored: ", err);
-    });
+localForage.iterate((data, key) => {
+    const value = key.endsWith("_raw") ? data : decompress(data);
+    const start = new Date();
+    start.setHours(start.getHours() - value.hours_to_show);
+    if (data.version !== CARD_VERSION || new Date(value.last_fetched) < start) {
+        localForage.removeItem(key);
+    }
+}).catch((err) => {
+    logWarning("Cache purging has errored: ", err);
+});
 
 console.info(
     `%c ${CARD_NAME.toUpperCase()} %c ${CARD_VERSION} `,

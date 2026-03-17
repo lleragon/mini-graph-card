@@ -223,14 +223,18 @@ export default class Graph {
     }
     
     _average(items) {
-        return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0) / items.length;
+        return items.reduce((sum, entry) => sum + entry.state, 0) / items.length;
     }
     
     _median(items) {
-        const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
-        const mid = Math.floor((itemsDup.length - 1) / 2);
-        if (itemsDup.length % 2 === 1) return parseFloat(itemsDup[mid].state);
-        return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
+        const sorted = Array.from(items).sort((a, b) => a.state - b.state);
+        const middle = Math.floor(sorted.length / 2);
+        
+        if (sorted.length % 2 === 0) {
+            return (sorted[middle - 1].state + sorted[middle].state) / 2;
+        }
+        
+        return sorted[middle].state;
     }
     
     _maximum(items) {
@@ -242,15 +246,15 @@ export default class Graph {
     }
     
     _first(items) {
-        return parseFloat(items[0].state);
+        return items[0].state;
     }
     
     _last(items) {
-        return parseFloat(items[items.length - 1].state);
+        return items[items.length - 1].state;
     }
     
     _sum(items) {
-        return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
+        return items.reduce((sum, entry) => sum + entry.state, 0);
     }
     
     _delta(items) {
@@ -265,7 +269,7 @@ export default class Graph {
         if (["delta", "diff"].includes(this.aggregateFuncName)) {
             return 0;
         } else {
-            return parseFloat(items[items.length - 1].state) || 0;
+            return items[items.length - 1].state || 0;
         }
     }
     

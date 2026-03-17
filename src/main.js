@@ -8,12 +8,13 @@ import handleClick from "./handleClick";
 import style from "./style";
 import "./initialize";
 import {CARD_NAME, CARD_NAME_READABLE, CARD_VERSION, ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
-import {compress, decompress, getAvg, getMax, getMilli, getMin, getTime, logWarning,} from "./utils";
+import {compress, decompress, getMinState, getMaxState, getAvgState, getTime, logWarning,} from "./utils";
 
-//TODO Clean cache after entity change
 //TODO check update interval if state doesn't changes for a long time
 //TODO HTML verschachtelung  vereinfachen
 //TODO Render in sep class?
+//todo histroy store date as unix
+//todo cache graph date in graph class
 
 class ExtremaGraphCard extends LitElement {
     constructor() {
@@ -156,7 +157,7 @@ class ExtremaGraphCard extends LitElement {
         `;
     }
     
-    renderWarnings(message) { //TODO more and specif error messages?
+    renderWarnings(message) {
         return html`
             <hui-warning>
                 <div>extrema-graph-card</div>
@@ -417,7 +418,7 @@ class ExtremaGraphCard extends LitElement {
         const {group_by, points_per_hour, hours_to_show, timeFormat} = this.config;
         
         // time units in milliseconds in this function
-        const interval = getMilli(1 / points_per_hour);
+        const interval = (1 / points_per_hour) * ONE_HOUR;
         const n_points = Math.ceil(hours_to_show * points_per_hour);
         
         // index is 0 (oldest) to n_points-1 (most recent ~= now)
@@ -543,39 +544,39 @@ class ExtremaGraphCard extends LitElement {
         }
     }
     
-    async updateData({config} = this) {
+    async updateData() {
+        console.debug("updateData");
+        if (!this.entity) {
+            this.setNextUpdate();
+            return;
+        }
+        
         this.updating = true;
         
-        //todo move to updateEntity()?
-        const end = this.getEndDate();
-        const start = new Date(end);
-        start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
-        
         try {
-            await this.updateEntity(start, end)
+            await this.updateStateHistory()
         } catch (err) {
             logWarning(err);
         }
         
-        if (this.entity) this.Graph.update();
-        
+        this.Graph.update();
         this.updateBounds();
         
-        if (config.graph_type !== "none" && this.entity && this.Graph.coords.length !== 0) {
+        if (this.config.graph_type !== "none" && this.Graph.coords.length !== 0) {
             this.Graph.min = this.boundary_min;
             this.Graph.max = this.boundary_max;
             
             //todo set svg element to undifend if not configurated and remove other config checks
-            if (config.graph_type === "bar") {
-                this.bars = this.Graph.getBars(config.bar_spacing);
+            if (this.config.graph_type === "bar") {
+                this.bars = this.Graph.getBars(this.config.bar_spacing);
             } else {
                 const line = this.Graph.getPath();
-                if (config.show.line === true) this.line = line;
-                if (config.show.fill) this.fill = this.Graph.getFill(line);
-                if (config.show.points) this.points = this.Graph.getPoints();
+                if (this.config.show.line === true) this.line = line;
+                if (this.config.show.fill) this.fill = this.Graph.getFill(line);
+                if (this.config.show.points) this.points = this.Graph.getPoints();
                 
-                if (Array.isArray(config.color)) {
-                    this.gradient = this.Graph.computeGradient(config.color, this.config.logarithmic);
+                if (Array.isArray(this.config.color)) {
+                    this.gradient = this.Graph.computeGradient(this.config.color, this.config.logarithmic);
                 }
             }
         }
@@ -628,6 +629,8 @@ class ExtremaGraphCard extends LitElement {
     }
     
     async getCache() {
+        if (!this.config.cache) return undefined;
+        
         //todo key generation during config update
         let key = `${this.entity.entity_id}_${this.config.hash}`
         if (!this.config.cache_compress) key = `${key}_raw`
@@ -647,22 +650,24 @@ class ExtremaGraphCard extends LitElement {
     }
     
     //TODO THIS FUNCTION :(
-    async updateEntity(start, end) {
-        if (!this.entity) return;
-        
+    async updateStateHistory() {
         let stateHistory = [];
         let skipInitialState = false;
+        let end = this.getEndDate();
+        let start = new Date(end - this.config.hours_to_show * 60 * 60 * 1000);
         
-        const history = this.config.cache ? await this.getCache() : undefined;
-        if (history && history.hours_to_show === this.config.hours_to_show) {
-            stateHistory = history.data;
+        const cachedHistory = await this.getCache();
+        console.debug(cachedHistory);
+        //todo hours_to_show comparisation neccassyray ? (config hash)
+        if (cachedHistory && cachedHistory.hours_to_show === this.config.hours_to_show) {
+            stateHistory = cachedHistory.data;
             
             let currDataIndex = stateHistory.findIndex((item) => new Date(item.last_changed) > start);
             if (currDataIndex !== -1) {
                 if (currDataIndex > 0) {
                     // include previous item
                     currDataIndex -= 1;
-                    // but change it's last changed time
+                    // but change it's last changed time  //todo change state timestamp??
                     stateHistory[currDataIndex].last_changed = start;
                 }
                 
@@ -674,7 +679,7 @@ class ExtremaGraphCard extends LitElement {
                 stateHistory = [];
             }
             
-            const lastFetched = new Date(history.last_fetched);
+            const lastFetched = new Date(cachedHistory.last_fetched);
             if (lastFetched > start) {
                 start = new Date(lastFetched - 1);
             }
@@ -687,6 +692,7 @@ class ExtremaGraphCard extends LitElement {
             this.config.entity_attribute ? false : skipInitialState,
             !!this.config.entity_attribute,
         );
+        
         if (newStateHistory[0] && newStateHistory[0].length > 0) {
             /**
              * hack because HA doesn't return anything if skipInitialState is false
@@ -709,7 +715,7 @@ class ExtremaGraphCard extends LitElement {
             newStateHistory = newStateHistory[0].filter((item) => !Number.isNaN(parseFloat(item.state)));
             newStateHistory = newStateHistory.map((item) => ({
                 last_changed: this.config.entity_attribute ? item.last_updated : item.last_changed,
-                state: item.state,
+                state: parseFloat(item.state),
             }));
             stateHistory = [...stateHistory, ...newStateHistory];
             
@@ -730,12 +736,9 @@ class ExtremaGraphCard extends LitElement {
         
         if (stateHistory.length === 0) return;
         
-        if (this.entity) {
-            this.updateExtrema(stateHistory);
-        }
-        
+        //todo move outside this function
+        this.updateExtrema(stateHistory);
         this.Graph.history = stateHistory;
-        
     }
     
     //TODO THIS FUNCTION
@@ -751,19 +754,17 @@ class ExtremaGraphCard extends LitElement {
     }
     
     updateExtrema(history) {
-        //todo include, getMin, getMax, getAVg her
         this.extrema = []
         if (this.config.show.extrema) {
-            this.extrema.push({type: "min", ...getMin(history, "state")});
+            this.extrema.push({type: "min", ...getMinState(history)});
         }
         if (this.config.show.average) {
-            this.extrema.push({type: "avg", state: getAvg(history, "state")});
+            this.extrema.push({type: "avg", state: getAvgState(history)});
         }
         if (this.config.show.extrema) {
-            this.extrema.push({type: "max", ...getMax(history, "state")});
+            this.extrema.push({type: "max", ...getMaxState(history)});
         }
     }
-    
     
     convertState(res) {
         const resultIndex = this.config.state_map.findIndex((s) => s.value === res.state);
