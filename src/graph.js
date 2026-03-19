@@ -6,12 +6,14 @@ export default class Graph {
         width,
         height,
         margin,
-        hours = 24,
-        points = 1,
+        hours_to_show,
+        points_per_hour,
         aggregateFuncName = "avg",
         groupBy = "interval",
         smoothing = true,
         logarithmic = false,
+        dynamic_color = undefined,
+        bar_spacing = 4,
     ) {
         const aggregateFuncMap = {
             avg: this._average,
@@ -32,47 +34,65 @@ export default class Graph {
         this.margin = margin;
         this._max = 0;
         this._min = 0;
-        this.points = points;
-        this.hours = hours;
+        this.hours_to_show = hours_to_show;
+        this.points_per_hour = points_per_hour;
         this.aggregateFuncName = aggregateFuncName;
+        this.dynamic_color = dynamic_color;
+        this.bar_spacing = bar_spacing;
         this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
         this._smoothing = smoothing;
         this._logarithmic = logarithmic;
         this._groupBy = groupBy;
         this._endTime = 0;
+        
+        this._cache = {
+            points: undefined,
+            path: undefined,
+            gradient: undefined,
+            fill: undefined,
+            bars: undefined,
+        }
     }
     
     get max() {
         return this._max;
     }
     
-    set max(max) {
+    set max(max) {  //todo include in graph and remove setter?
         this._max = max;
+        this._clearCache();
     }
     
-    get min() {
+    get min() { //todo include in graph and remove setter?
         return this._min;
     }
     
     set min(min) {
         this._min = min;
+        this._clearCache();
     }
     
-    set history(data) {
-        this._history = data;
-    }
-    
-    update(history = undefined) {
-        if (history) {
-            this._history = history;
+    _clearCache() {
+        this._cache = {
+            points: undefined,
+            path: undefined,
+            gradient: undefined,
+            fill: undefined,
+            bars: undefined,
         }
-        if (!this._history) return;
+    }
+    
+    update(history) {
+        this._history = history;
+        this._clearCache();
+        
+        if (!this._history || history.length <= 0) return;
         this._updateEndTime();
         
         const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
         
         // extend length to fill missing history
-        histGroups.length = Math.ceil(this.hours * this.points);
+        histGroups.length = Math.ceil(this.hours_to_show * this.points_per_hour);
         
         this.coords = this._calcPoints(histGroups);
         this.min = Math.min(...this.coords.map((item) => Number(item[V])));
@@ -81,7 +101,7 @@ export default class Graph {
     
     _reducer(res, item) {
         const age = this._endTime - new Date(item.last_changed).getTime();
-        const interval = (age / ONE_HOUR) * this.points - this.hours * this.points;
+        const interval = (age / ONE_HOUR) * this.points_per_hour - this.hours_to_show * this.points_per_hour;
         if (interval < 0) {
             const key = Math.floor(Math.abs(interval));
             if (!res[key]) res[key] = [];
@@ -93,7 +113,7 @@ export default class Graph {
     }
     
     _calcPoints(history) {
-        let xRatio = this.width / (this.hours * this.points - 1);
+        let xRatio = this.width / (this.hours_to_show * this.points_per_hour - 1);
         xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
         
         const coords = [];
@@ -125,7 +145,10 @@ export default class Graph {
     }
     
     getPoints() {
+        if (this._cache.points) return this._cache.points;  //Serving from cache
         let {coords} = this;
+        let points;
+        
         if (coords.length === 1) {
             coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
         }
@@ -133,19 +156,24 @@ export default class Graph {
         if (this._smoothing) {
             let last = coords[0];
             coords.shift();
-            return coords.map((point, i) => {
+            points = coords.map((point, i) => {
                 const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
                 const sum = (last[V] + point[V]) / 2;
                 last = point;
                 return [Z[X], Z[Y], sum, i + 1];
             });
         } else {
-            return coords.map((point, i) => [point[X], point[Y], point[V], i]);
+            points = coords.map((point, i) => [point[X], point[Y], point[V], i]);
         }
+        
+        this._cache.points = points;
+        return points;
     }
     
     getPath() {
+        if (this._cache.path) return this._cache.path;  //Serving from cache
         let {coords} = this;
+        
         if (coords.length === 1) {
             coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
         }
@@ -164,15 +192,21 @@ export default class Graph {
             last = next;
         });
         path += ` ${next[X]},${next[Y]}`;
+        
+        this._cache.path = path;
         return path;
     }
     
-    computeGradient(thresholds, logarithmic) {
-        const scale = logarithmic
+    computeGradient() {
+        if (this._cache.gradient) return this._cache.gradient; //Serving from cache
+        if (!Array.isArray(this.dynamic_color)) return null;
+        let gradient;
+        
+        const scale = this._logarithmic
             ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
             : this._max - this._min;
         
-        return thresholds.map((stop, index, arr) => {
+        gradient = this.dynamic_color.map((stop, index, arr) => {
             let color;
             if (stop.value > this._max && arr[index + 1]) {
                 const factor = (this._max - arr[index + 1].value) / (stop.value - arr[index + 1].value);
@@ -184,7 +218,7 @@ export default class Graph {
             let offset;
             if (scale <= 0) {
                 offset = 0;
-            } else if (logarithmic) {
+            } else if (this._logarithmic) {
                 offset = (Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, stop.value))) * (100 / scale);
             } else {
                 offset = (this._max - stop.value) * (100 / scale);
@@ -194,26 +228,35 @@ export default class Graph {
                 offset,
             };
         });
+        this._cache.gradient = gradient;
+        return gradient;
     }
     
-    getFill(path) {
+    getFill() {
+        if (this._cache.fill) return this._cache.fill;  //Serving from cache
         const height = this.height + this.margin[Y] * 4;
-        let fill = path;
+        let fill = this.getPath();
         fill += ` L ${this.width - this.margin[X] * 2}, ${height}`;
         fill += ` L ${this.coords[0][X]}, ${height} z`;
+        this._cache.fill = fill;
         return fill;
     }
     
-    getBars(spacing = 4) {
+    getBars() {
+        if (this._cache.bars) return this._cache.bars;  //Serving from cache
+        let bars;
+        
         const coords = this._calcY(this.coords);
-        const xRatio = (this.width - spacing) / Math.ceil(this.hours * this.points);
-        return coords.map((coord, i) => ({
-            x: xRatio * i + xRatio + spacing,
+        const xRatio = (this.width - this.bar_spacing) / Math.ceil(this.hours_to_show * this.points_per_hour);
+        bars = coords.map((coord, i) => ({
+            x: xRatio * i + xRatio + this.bar_spacing,
             y: coord[Y],
             height: this.height - coord[Y] + this.margin[Y] * 4,
-            width: xRatio - spacing,
+            width: xRatio - this.bar_spacing,
             value: coord[V],
         }));
+        this._cache.bars = bars;
+        return bars;
     }
     
     _midPoint(Ax, Ay, Bx, By) {

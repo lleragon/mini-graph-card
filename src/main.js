@@ -8,7 +8,7 @@ import handleClick from "./handleClick";
 import style from "./style";
 import "./initialize";
 import {CARD_NAME, CARD_NAME_READABLE, CARD_VERSION, ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
-import {compress, decompress, getMinState, getMaxState, getAvgState, getTime, logWarning,} from "./utils";
+import {compress, decompress, getAvgState, getMaxState, getMinState, getTime, logWarning,} from "./utils";
 
 //TODO check update interval if state doesn't changes for a long time
 //TODO HTML verschachtelung  vereinfachen
@@ -24,12 +24,7 @@ class ExtremaGraphCard extends LitElement {
         this.boundary_min = 0;
         this.boundary_max = 0;
         this.entity = undefined;
-        this.line = undefined;
-        this.bars = undefined;
         this.extrema = [];
-        this.fill = undefined;
-        this.points = [];
-        this.gradient = undefined;
         this.tooltip = {};
         this.updating = false;
         this.stateChanged = false;
@@ -47,7 +42,6 @@ class ExtremaGraphCard extends LitElement {
             config: {},
             entity: {},
             Graph: [],
-            line: [],
             shadow: [],
             length: Number,
             boundary_min: Number,
@@ -91,6 +85,8 @@ class ExtremaGraphCard extends LitElement {
             this.config.group_by,
             this.config.smoothing,
             this.config.logarithmic,
+            this.config.color,
+            this.config.bar_spacing
         );
     }
     
@@ -112,12 +108,17 @@ class ExtremaGraphCard extends LitElement {
     shouldUpdate(changedProps) {
         //todo move color set and remove this function see  https://lit.dev/docs/v1/components/lifecycle/#shouldupdate
         
+        
+        
         if (UPDATE_PROPS.some((prop) => changedProps.has(prop))) {
             if (this.config && this.entity) {
                 this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
             }
             return true;
         }
+        
+        //todo ovverituing to alwys force update
+        return true;
     }
     
     firstUpdated(changedProperties) {
@@ -232,7 +233,8 @@ class ExtremaGraphCard extends LitElement {
     
     getEntityState() {
         if (this.config.show.state === "last") {
-            return this.points[this.points.length - 1][V];
+            let points = this.Graph.getPoints()
+            return points[points.length - 1][V];
         } else if (this.config.entity_attribute) {
             return this.getObjectAttr(this.entity.attributes, this.config.entity_attribute);
         } else {
@@ -265,7 +267,8 @@ class ExtremaGraphCard extends LitElement {
                     </div>
                 </div> `;
         } else {
-            content = html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`;
+            content = html`
+                <ha-spinner aria-label="Loading" size="small"></ha-spinner>`;
         }
         
         return html`
@@ -273,7 +276,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderSvgFill() {
-        if (!this.fill) return;
+        if (this.config.graph_type !== "line" || !this.config.show.fill) return;
         const fade = this.config.show.fill === "fade";
         
         return svg`
@@ -291,13 +294,13 @@ class ExtremaGraphCard extends LitElement {
                     type=${this.config.show.fill}
                     fill='white'
                     mask=${fade ? `url(#fill-grad-mask-${this.id})` : ""}
-                    d=${this.fill}
+                    d=${this.Graph.getFill()}
                 />
             </mask>`;
     }
     
     renderSvgLine() {
-        if (!this.line) return;
+        if (this.config.graph_type !== "line" || !this.config.show.line) return;
         
         return svg`
             <mask id=${`line-${this.id}`}>
@@ -308,13 +311,13 @@ class ExtremaGraphCard extends LitElement {
                     stroke-dashoffset='none'
                     stroke=${"white"}
                     stroke-width=${this.config.line_width}
-                    d=${this.line}
+                    d=${this.Graph.getPath()}
                   />
             </mask>`;
     }
     
     renderSvgPoint(point) {
-        const color = this.gradient ? this.computeColor(point[V]) : "inherit";
+        const color = this.Graph.computeGradient() ? this.computeColor(point[V]) : "inherit";
         
         return svg`
             <circle
@@ -330,7 +333,7 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderSvgPoints() {
-        if (!this.points) return;
+        if (this.config.graph_type !== "line" || !this.config.show.points) return;
         const color = this.computeColor(this.entity.state);
         
         return svg`
@@ -340,13 +343,14 @@ class ExtremaGraphCard extends LitElement {
                 fill=${color}
                 stroke=${color}
                 stroke-width=${this.config.line_width / 2}>
-                ${this.points.map((point) => this.renderSvgPoint(point))}
+                ${this.Graph.getPoints().map((point) => this.renderSvgPoint(point))}
             </g>`;
     }
     
     renderSvgGradient() {
-        if (!this.gradient) return;
-        const stops = this.gradient.map((stop) =>
+        if (this.config.graph_type !== "line" || !this.Graph.computeGradient()) return;
+        
+        const stops = this.Graph.computeGradient().map((stop) =>
             svg`<stop stop-color=${stop.color} offset=${`${stop.offset}%`} />`,)
         
         return svg`
@@ -356,8 +360,8 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderSvgLineRect() {
-        if (!this.line) return;
-        const fill = this.gradient ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
+        if (this.config.graph_type !== "line" || !this.config.show.line) return;
+        const fill = this.Graph.computeGradient() ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
         
         return svg`
           <rect class='line--rect'
@@ -369,8 +373,9 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderSvgFillRect() {
-        if (!this.fill) return;
-        const svgFill = this.gradient ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
+        if (this.config.graph_type !== "line" || !this.config.show.fill) return;
+        
+        const svgFill = this.Graph.computeGradient() ? `url(#grad-${this.id})` : this.computeColor(this.entity.state);
         
         return svg`
           <rect class='fill--rect'
@@ -382,9 +387,9 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderSvgBars() {
-        if (!this.bars) return;
+        if (this.config.graph_type !== "bar") return;
         
-        const items = this.bars.map((bar, i) => svg`
+        const items = this.Graph.getBars().map((bar, i) => svg`
                     <rect class='bar' x=${bar.x} y=${bar.y}
                       height=${bar.height} width=${bar.width} fill=${this.computeColor(bar.value)}
                       @mouseover=${() => this.setTooltip(i, bar.value)}
@@ -410,7 +415,7 @@ class ExtremaGraphCard extends LitElement {
                   ${this.renderSvgLineRect()}
                   ${this.renderSvgBars()}
                 </g>
-                ${this.renderSvgPoints(this.points)}
+                ${this.renderSvgPoints()}
             </svg>`;
     }
     
@@ -543,8 +548,9 @@ class ExtremaGraphCard extends LitElement {
             this.updateData().then();
         }
     }
-    
+    //todo this function
     async updateData() {
+        console.debug("updateData");
         let history = [];
         this.updating = true;
         
@@ -562,32 +568,20 @@ class ExtremaGraphCard extends LitElement {
         
         if (history.length !== 0) {
             this.updateExtrema(history);
-            this.Graph.update(history);
         }
+        this.Graph.update(history);
         this.updateBounds();
-        
         
         if (this.config.graph_type !== "none" && this.Graph.coords.length !== 0) {
             this.Graph.min = this.boundary_min;
             this.Graph.max = this.boundary_max;
-            
-            //todo set svg element to undifend if not configurated and remove other config checks
-            if (this.config.graph_type === "bar") {
-                this.bars = this.Graph.getBars(this.config.bar_spacing);
-            } else {
-                const line = this.Graph.getPath();
-                if (this.config.show.line === true) this.line = line;
-                if (this.config.show.fill) this.fill = this.Graph.getFill(line);
-                if (this.config.show.points) this.points = this.Graph.getPoints();
-                
-                if (Array.isArray(this.config.color)) {
-                    this.gradient = this.Graph.computeGradient(this.config.color, this.config.logarithmic);
-                }
-            }
         }
         
         this.updating = false;
         this.setNextUpdate();
+        console.debug("done");
+        //todo temperorary forced reneder after update
+        this.requestUpdate();
     }
     
     getBoundary(type, configVal, fallback) {
