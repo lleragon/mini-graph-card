@@ -545,22 +545,27 @@ class ExtremaGraphCard extends LitElement {
     }
     
     async updateData() {
-        console.debug("updateData");
+        let history = [];
+        this.updating = true;
+        
         if (!this.entity) {
             this.setNextUpdate();
+            this.updating = false;
             return;
         }
         
-        this.updating = true;
-        
         try {
-            await this.updateStateHistory()
+            history = await this.updateStateHistory()
         } catch (err) {
             logWarning(err);
         }
         
-        this.Graph.update();
+        if (history.length !== 0) {
+            this.updateExtrema(history);
+            this.Graph.update(history);
+        }
         this.updateBounds();
+        
         
         if (this.config.graph_type !== "none" && this.Graph.coords.length !== 0) {
             this.Graph.min = this.boundary_min;
@@ -657,9 +662,8 @@ class ExtremaGraphCard extends LitElement {
         let start = new Date(end - this.config.hours_to_show * 60 * 60 * 1000);
         
         const cachedHistory = await this.getCache();
-        console.debug(cachedHistory);
-        //todo hours_to_show comparisation neccassyray ? (config hash)
-        if (cachedHistory && cachedHistory.hours_to_show === this.config.hours_to_show) {
+        
+        if (cachedHistory) {
             stateHistory = cachedHistory.data;
             
             let currDataIndex = stateHistory.findIndex((item) => new Date(item.last_changed) > start);
@@ -671,7 +675,7 @@ class ExtremaGraphCard extends LitElement {
                     stateHistory[currDataIndex].last_changed = start;
                 }
                 
-                stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
+                stateHistory = stateHistory.slice(currDataIndex);
                 // skip initial state when fetching recent/not-cached data
                 skipInitialState = true;
             } else {
@@ -734,11 +738,7 @@ class ExtremaGraphCard extends LitElement {
             }
         }
         
-        if (stateHistory.length === 0) return;
-        
-        //todo move outside this function
-        this.updateExtrema(stateHistory);
-        this.Graph.history = stateHistory;
+        return stateHistory
     }
     
     //TODO THIS FUNCTION
