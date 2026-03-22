@@ -14,7 +14,6 @@ import {compress, decompress, getAvgState, getMaxState, getMinState, getTime, lo
 //TODO HTML verschachtelung  vereinfachen
 //TODO Render in sep class?
 //todo histroy store date as unix
-//todo cache graph date in graph class
 
 class ExtremaGraphCard extends LitElement {
     constructor() {
@@ -22,18 +21,15 @@ class ExtremaGraphCard extends LitElement {
         this.id = Math.random().toString(36).substring(2, 12);
         this.config = {};
         this.Graph = undefined;
-        this.color = undefined;
-        this.boundary_min = 0;
-        this.boundary_max = 0;
         this.entity = undefined;
         this.extrema = [];
         this.tooltip = {};
         this.updating = false;
         this.stateChanged = false;
-        this._requestLitElementUpdate = false;
         this._hass = undefined;
         this._updateTimeout = undefined
         this._configChanged = false;
+        this.triggerLitUpdate = false;
     }
     
     static get styles() {
@@ -41,14 +37,9 @@ class ExtremaGraphCard extends LitElement {
     }
     
     static get properties() {
-        //todo check if all are needed
         return {
-            id: {attribute: false},
-            config: {attribute: false},
-            entity: {attribute: false},
             tooltip: {attribute: false},
-            color: {attribute: false},
-            _requestLitElementUpdate: {attribute: false},
+            triggerLitUpdate: {attribute: false},   //Helper to trigger a lit element update
         };
     }
     
@@ -103,10 +94,14 @@ class ExtremaGraphCard extends LitElement {
     }
     
     scheduleDataUpdate(reason) {
-        // init = init load or cfg updated  => immediate
-        // hass = new hass object   => 1000 or None
-        // done = update done   => interval or pph
-        // conn = lit elemnt connected callback   => immediate
+        /*
+        Possible values for reason:
+        init    Initial load of the card, first data update
+        cfg     Card configuration update
+        dom     Card added to the document's DOM
+        hass    New hass object from home assistant
+        done    A data update has finished
+        */
         
         let delay;
         switch (reason) {
@@ -132,14 +127,6 @@ class ExtremaGraphCard extends LitElement {
             if (this._updateTimeout) clearTimeout(this._updateTimeout);
             this._updateTimeout = setTimeout(this.updateData.bind(this), delay);
         }
-    }
-    
-    //todo remove this method and doe color update some else...
-    update(changedProperties) {
-        if (this.config && this.entity) {
-            this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
-        }
-        super.update(changedProperties)
     }
     
     render() {
@@ -181,18 +168,20 @@ class ExtremaGraphCard extends LitElement {
         
         if (!show.name && !(show.icon && align_icon !== "state")) return html``
         
+        const color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
+        
         return html`
             <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
-                ${this.renderName()}
-                ${align_icon !== "state" ? this.renderIcon() : ""}
+                ${this.renderName(color)}
+                ${align_icon !== "state" ? this.renderIcon(color) : ""}
             </div>`;
     }
     
-    renderName() {
+    renderName(rawColor) {
         if (!this.config.show.name) return;
         
         const name = this.config.name || this.entity.attributes.friendly_name || this.entity.entity_id;
-        const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${this.color};` : "";
+        const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${rawColor};` : "";
         
         return html`
             <div class="name flex">
@@ -200,14 +189,14 @@ class ExtremaGraphCard extends LitElement {
             </div>`;
     }
     
-    renderIcon() {
+    renderIcon(color) {
         if (!this.config.show.icon) return;
         
         const icon = this.config.icon || this.entity.attributes.icon || stateIcon(this.entity) || "";
         
         return html`
             <div class="icon" loc=${this.config.align_icon}
-                 style=${this.config.show.icon_adaptive_color ? `color: ${this.color};` : ""}>
+                 style=${this.config.show.icon_adaptive_color ? `color: ${color};` : ""}>
                 <ha-icon .icon=${icon}></ha-icon>
             </div>`;
     }
@@ -464,8 +453,8 @@ class ExtremaGraphCard extends LitElement {
         
         return html`
             <div class="graph__labels --primary flex">
-                <span class="label--max">${this.computeState(this.boundary_max)}</span>
-                <span class="label--min">${this.computeState(this.boundary_min)}</span>
+                <span class="label--max">${this.computeState(this.Graph.max)}</span>
+                <span class="label--min">${this.computeState(this.Graph.min)}</span>
             </div>`;
     }
     
@@ -575,39 +564,34 @@ class ExtremaGraphCard extends LitElement {
             this.updateExtrema(history);
         }
         this.Graph.update(history);
-        this.updateBounds();
-        
-        if (this.config.graph_type !== "none" && this.Graph.coords.length !== 0) {
-            this.Graph.min = this.boundary_min;
-            this.Graph.max = this.boundary_max;
-        }
+        this.updateGraphBounds();
         
         this.updating = false;
         this.scheduleDataUpdate('done');
         //Force litElement to re-render (needed because of immutable objects)
         //See https://lit.dev/docs/components/properties/#mutating-properties
-        this._requestLitElementUpdate = !this._requestLitElementUpdate
+        this.triggerLitUpdate = !this.triggerLitUpdate
     }
     
-    getBoundary(type, configVal, fallback) {
+    getBoundary(type, configVal) {
         if (configVal === undefined) {
             // dynamic boundary depending on values
-            return this.Graph[type] || fallback;
+            return this.Graph[type];
         } else if (configVal[0] !== "~") {
             // fixed boundary
             return configVal;
         } else {
             // soft boundary (respecting out of range values)
-            return Math[type](Number(configVal.substr(1)), this.Graph[type]);
+            return Math[type](Number(configVal.substring(1)), this.Graph[type]);
         }
     }
     
-    updateBounds() {
+    updateGraphBounds() {
         const min = this.config.lower_bound
         const max = this.config.upper_bound
         
-        let boundary_min = this.getBoundary("min", min, this.boundary_min)
-        let boundary_max = this.getBoundary("max", max, this.boundary_max)
+        let boundary_min = this.getBoundary("min", min)
+        let boundary_max = this.getBoundary("max", max)
         
         if (this.config.min_bound_range) {
             const currentRange = Math.abs(boundary_min - boundary_max);
@@ -628,28 +612,25 @@ class ExtremaGraphCard extends LitElement {
             }
         }
         
-        this.boundary_min = boundary_min
-        this.boundary_max = boundary_max
+        this.Graph.min = boundary_min;
+        this.Graph.max = boundary_max;
     }
     
     async getCache() {
         if (!this.config.cache) return undefined;
         
-        //todo key generation during config update
-        let key = `${this.entity.entity_id}_${this.config.hash}`
-        if (!this.config.cache_compress) key = `${key}_raw`
-        
-        const data = await localForage.getItem(key);
+        const data = await localForage.getItem(this.config.cache_key);
         if (!data) return null;
         
         return this.config.cache_compress ? decompress(data) : data;
     }
     
     async setCache(data) {
-        if (this.config.cache_compress) {
-            localForage.setItem(`${this.entity.entity_id}_${this.config.hash}`, compress(data));
-        } else {
-            localForage.setItem(`${this.entity.entity_id}_${this.config.hash}_raw`, data);
+        try {
+            localForage.setItem(this.config.cache_key, this.config.cache_compress ? compress(data) : data);
+        } catch (error) {
+            log.warn(error);
+            localForage.clear();
         }
     }
     
@@ -723,17 +704,13 @@ class ExtremaGraphCard extends LitElement {
             stateHistory = [...stateHistory, ...newStateHistory];
             
             if (this.config.cache) {
-                this.setCache(
+                await this.setCache(
                     {
                         hours_to_show: this.config.hours_to_show,
                         last_fetched: new Date(),
                         data: stateHistory,
                         CARD_VERSION,
-                    },
-                ).catch((err) => {
-                    logWarning(err);
-                    localForage.clear();
-                });
+                    });
             }
         }
         

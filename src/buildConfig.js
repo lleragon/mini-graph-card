@@ -45,18 +45,24 @@ function buildConfig(rawConfig) {
     //Scale font_size
     conf.font_size = ((conf.font_size / 100) * FONT_SIZE).toFixed(2);
     
-    //Generate time format for extrema and average info (show or hide date)
-    conf.timeFormat = {hourCycle: "h23"};
-    if (conf.hours_to_show > 24) conf.timeFormat = {...conf.timeFormat, day: "numeric", weekday: "short"};
-    
     //Limit number of bars to show
     if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
         log.warn(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
     }
     
-    conf.hash = SparkMD5.hash(JSON.stringify(conf))
-    log.debug('Configuration Updated:' + JSON.stringify(conf));
+    //Generate time format for extrema and average info (show or hide date)
+    conf.timeFormat = {hourCycle: "h23"};
+    if (conf.hours_to_show > 24) conf.timeFormat = {...conf.timeFormat, day: "numeric", weekday: "short"};
+    
+    //Generate cache key
+    if (conf.cache) {
+        let hash = SparkMD5.hash(JSON.stringify(conf)); //Hash configuration to identify cache objects
+        conf.cache_key = `${this.entity.entity_id}_${hash}`;
+        if (!conf.cache_compress) conf.cache_key = `${conf.cache_key}_raw`;
+    }
+    
+    log.debug('Configuration updated:', conf);
     return conf;
 }
 

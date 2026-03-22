@@ -1,12 +1,7 @@
 
 TO REMOVE
-    compareArray ?
     style state--small
     style tooltip--label
-    all legend
-    all Indicator
 
-    this.length = []; //Only used for animation, adapt dev branch?
-    secondary y-axis
 
 todo readme: update images and examples

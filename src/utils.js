@@ -51,11 +51,11 @@ function isBool(value) {
 }
 
 const log = {
-    debug: function (message) {
-        console.debug(`${CARD_NAME}: ${message}`);
+    debug: function (message, data = undefined) {
+        console.debug(`${CARD_NAME}: ${message}`, data);
     },
-    warn: function (message) {
-        console.warn(`${CARD_NAME}: ${message}`);
+    warn: function (message, data = undefined) {
+        console.warn(`${CARD_NAME}: ${message}`, data);
     }
 };
 
