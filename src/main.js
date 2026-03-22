@@ -7,8 +7,8 @@ import Graph from "./graph";
 import handleClick from "./handleClick";
 import style from "./style";
 import "./initialize";
-import {CARD_NAME, CARD_NAME_READABLE, CARD_VERSION, ONE_HOUR, UPDATE_PROPS, V, X, Y} from "./const";
-import {compress, decompress, getAvgState, getMaxState, getMinState, getTime, logWarning,} from "./utils";
+import {CARD_NAME, CARD_NAME_READABLE, CARD_VERSION, ONE_HOUR, V, X, Y} from "./const";
+import {compress, decompress, getAvgState, getMaxState, getMinState, getTime, log} from "./utils";
 
 //TODO check update interval if state doesn't changes for a long time
 //TODO HTML verschachtelung  vereinfachen
@@ -28,7 +28,10 @@ class ExtremaGraphCard extends LitElement {
         this.tooltip = {};
         this.updating = false;
         this.stateChanged = false;
-        this.initial = true;
+        this._requestLitElementUpdate = false;
+        this._hass = undefined;
+        this._updateTimeout = undefined
+        this._configChanged = false;
     }
     
     static get styles() {
@@ -36,44 +39,20 @@ class ExtremaGraphCard extends LitElement {
     }
     
     static get properties() {
+        //todo check if all are needed
         return {
-            id: String,
-            _hass: {},
-            config: {},
-            entity: {},
-            Graph: [],
-            shadow: [],
-            length: Number,
-            boundary_min: Number,
-            boundary_max: Number,
-            extrema: [],
-            tooltip: {},
-            color: String,
+            id: {attribute: false},
+            config: {attribute: false},
+            entity: {attribute: false},
+            tooltip: {attribute: false},
+            color: {attribute: false},
+            _requestLitElementUpdate: {attribute: false},
         };
-    }
-    
-    //entity state change from home assistant
-    set hass(hass) {
-        this._hass = hass;
-        const entityState = hass?.states[this.config.entity];
-        if (entityState && this.entity !== entityState) {
-            this.entity = entityState;
-            this.stateChanged = true;
-            
-            if (this.config.update_interval <= 0 && !this.updating) {
-                setTimeout(
-                    () => {this.updateData().then();},
-                    this.initial ? 0 : 1000,
-                );
-            }
-        }
     }
     
     //card config update from home assistant
     setConfig(rawConfig) {
         this.config = buildConfig(rawConfig);
-        
-        if (this._hass) this.hass = this._hass; //Trigger data update
         
         this.Graph = new Graph(
             500,
@@ -88,41 +67,77 @@ class ExtremaGraphCard extends LitElement {
             this.config.color,
             this.config.bar_spacing
         );
+        
+        //Force data update
+        this._configChanged = true;
+        if (this._hass) this.hass = this._hass;
+    }
+    
+    //entity state change from home assistant
+    set hass(hass) {
+        this._hass = hass;
+        const newEntity = hass?.states[this.config.entity];
+        
+        if (newEntity && (this.entity !== newEntity || this._configChanged)) {
+            this.scheduleDataUpdate(this._configChanged ? 'cfg' : (this.entity ? 'hass' : 'init'))
+            this.entity = newEntity;
+            this.stateChanged = true;
+            this._configChanged = false;
+        }
     }
     
     //Lit -> Invoked when a component is added to the document's DOM
     connectedCallback() {
         super.connectedCallback();
-        if (this.config.update_interval > 0) {
-            window.requestAnimationFrame(() => {this.updateOnInterval();});
-            this.interval = setInterval(() => this.updateOnInterval(), this.config.update_interval * 1000);
-        }
+        log.debug('Added to DOM');
+        if (this._hass && this.entity) this.scheduleDataUpdate('dom')
     }
     
     //Lit -> Invoked when a component is removed from the document's DOM
     disconnectedCallback() {
-        if (this.interval) clearInterval(this.interval);
+        if (this._updateTimeout) clearInterval(this._updateTimeout);
+        log.debug('Removed from DOM, scheduled update canceled');
         super.disconnectedCallback();
     }
     
-    shouldUpdate(changedProps) {
-        //todo move color set and remove this function see  https://lit.dev/docs/v1/components/lifecycle/#shouldupdate
+    scheduleDataUpdate(reason) {
+        // init = init load or cfg updated  => immediate
+        // hass = new hass object   => 1000 or None
+        // done = update done   => interval or pph
+        // conn = lit elemnt connected callback   => immediate
         
-        
-        
-        if (UPDATE_PROPS.some((prop) => changedProps.has(prop))) {
-            if (this.config && this.entity) {
-                this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
-            }
-            return true;
+        let delay;
+        switch (reason) {
+            case 'init':
+            case 'cfg':
+            case 'dom':
+                delay = 10;
+                break
+            case 'hass':
+                if (this.config.update_interval <= 0) delay = 1000;
+                break;
+            case 'done':
+                if (this.config.update_interval <= 0) delay = (1 / this.config.points_per_hour) * ONE_HOUR;
+                else delay = this.config.update_interval * 1000
+                break;
+            default:
+                log.warn('scheduleDataUpdate() -> unknown reason: ' + reason);
+                break;
         }
         
-        //todo ovverituing to alwys force update
-        return true;
+        if (delay) {
+            log.debug(`Scheduling data update. (reason: ${reason}, delay: ${delay}ms)`);
+            if (this._updateTimeout) clearTimeout(this._updateTimeout);
+            this._updateTimeout = setTimeout(this.updateData.bind(this), delay);
+        }
     }
     
-    firstUpdated(changedProperties) {
-        this.initial = false;
+    //todo remove this method and doe color update some else...
+    update(changedProperties) {
+        if (this.config && this.entity) {
+            this.color = this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState());
+        }
+        super.update(changedProperties)
     }
     
     render() {
@@ -154,8 +169,7 @@ class ExtremaGraphCard extends LitElement {
                 ${this.renderState()}
                 ${this.renderGraph()}
                 ${this.renderInfo()}
-            </ha-card>
-        `;
+            </ha-card>`;
     }
     
     renderWarnings(message) {
@@ -522,7 +536,7 @@ class ExtremaGraphCard extends LitElement {
             if (stateMap) {
                 return stateMap.label;
             } else {
-                logWarning(`value [${rawState}] not found in state_map`);
+                log.warn(`value [${rawState}] not found in state_map`);
             }
         }
         
@@ -542,28 +556,23 @@ class ExtremaGraphCard extends LitElement {
         return nbrf.format(state * this.config.value_factor);
     }
     
-    updateOnInterval() {
-        if (this.stateChanged && !this.updating) {
-            this.stateChanged = false;
-            this.updateData().then();
-        }
-    }
     //todo this function
     async updateData() {
-        console.debug("updateData");
+        //todo only fetch new histroy if state has changed
         let history = [];
-        this.updating = true;
         
-        if (!this.entity) {
-            this.setNextUpdate();
-            this.updating = false;
+        if (this.updating) {
+            log.debug('Cannot update data, an update is already in progress.');
             return;
         }
+        this.updating = true;
+        this.stateChanged = false;
+        log.debug('Updating data');
         
         try {
             history = await this.updateStateHistory()
         } catch (err) {
-            logWarning(err);
+            log.warn(err);
         }
         
         if (history.length !== 0) {
@@ -578,10 +587,10 @@ class ExtremaGraphCard extends LitElement {
         }
         
         this.updating = false;
-        this.setNextUpdate();
-        console.debug("done");
-        //todo temperorary forced reneder after update
-        this.requestUpdate();
+        this.scheduleDataUpdate('done');
+        //Force litElement to re-render (needed because of immutable objects)
+        //See https://lit.dev/docs/components/properties/#mutating-properties
+        this._requestLitElementUpdate = !this._requestLitElementUpdate
     }
     
     getBoundary(type, configVal, fallback) {
@@ -784,17 +793,6 @@ class ExtremaGraphCard extends LitElement {
                 break;
         }
         return date;
-    }
-    
-    //TODO FROM HERE
-    setNextUpdate() {
-        if (this.config.update_interval <= 0) {
-            const interval = 1 / this.config.points_per_hour;
-            clearInterval(this.interval);
-            this.interval = setInterval(() => {
-                if (!this.updating) this.updateData();
-            }, interval * ONE_HOUR);
-        }
     }
     
     getCardSize() {

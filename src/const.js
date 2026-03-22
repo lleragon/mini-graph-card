@@ -6,16 +6,6 @@ const CARD_VERSION = version
 const FONT_SIZE = 14;
 const MAX_BARS = 96;
 
-const UPDATE_PROPS = [
-    "entity",
-    "line",
-    "length",
-    "fill",
-    "points",
-    "tooltip",
-    "abs",
-    "config"
-];
 
 const DEFAULT_CONF = {
     entity: undefined,
@@ -98,7 +88,6 @@ export {
     CARD_VERSION,
     FONT_SIZE,
     MAX_BARS,
-    UPDATE_PROPS,
     DEFAULT_CONF,
     DEFAULT_CONF_SHOW,
     AGGREGATE_FUNCTIONS,

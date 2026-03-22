@@ -34,7 +34,7 @@ export default [
                 ecma: 2015, // ES6
                 compress: {
                     module: true,
-                    drop_console: dev ? false : ['debug'],
+                    drop_console: dev ? false : ['debug'],  // todo replace with @rollup/plugin-strip
                 },
                 enclose: true,
                 format: {comments: false, wrap_iife: true}

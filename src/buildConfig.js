@@ -1,5 +1,5 @@
 import {AGGREGATE_FUNCTIONS, CARD_NAME, DEFAULT_CONF, DEFAULT_CONF_SHOW, FONT_SIZE, MAX_BARS} from "./const";
-import {isBool, isInt, isNumber, isString, isUndef, logWarning} from "./utils";
+import {isBool, isInt, isNumber, isString, isUndef, log} from "./utils";
 import SparkMD5 from "spark-md5";
 
 function buildConfig(rawConfig) {
@@ -29,7 +29,7 @@ function buildConfig(rawConfig) {
     
     //Turn smoothing off for binary sensor
     if (conf.smoothing && conf.entity.startsWith("binary_sensor.")) {
-        logWarning('Smoothing ist not compatible with binary sensors');
+        log.warn('Smoothing ist not compatible with binary sensors');
         conf.smoothing = false;
     }
     
@@ -38,7 +38,7 @@ function buildConfig(rawConfig) {
     
     //Override points per hour to mach group_by function
     if (conf.group_by === "date" || conf.group_by === "hour") {
-        logWarning('Configuration option group_by overrides option points_per_hour.');
+        log.warn('Configuration option group_by overrides option points_per_hour.');
         conf.points_per_hour = (conf.group_by === "date") ? 1 / 24 : 1
     }
     
@@ -52,11 +52,11 @@ function buildConfig(rawConfig) {
     //Limit number of bars to show
     if (conf.graph_type === "bar" && (conf.hours_to_show * conf.points_per_hour > MAX_BARS)) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show);
-        logWarning(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
+        log.warn(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
     }
     
     conf.hash = SparkMD5.hash(JSON.stringify(conf))
-    console.debug(`${CARD_NAME}: Configuration`, conf);
+    log.debug('Configuration Updated:' + JSON.stringify(conf));
     return conf;
 }
 

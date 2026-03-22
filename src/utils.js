@@ -30,10 +30,6 @@ function decompress(data) {
     }
 }
 
-const logWarning = (message) => {
-    console.warn(`${CARD_NAME}: ${message}`);
-};
-
 function isString(value) {
     return (typeof value === "string");
 }
@@ -54,6 +50,16 @@ function isBool(value) {
     return (typeof value === "boolean");
 }
 
+const log = {
+    debug: function (message) {
+        console.debug(`${CARD_NAME}: ${message}`);
+    },
+    warn: function (message) {
+        console.warn(`${CARD_NAME}: ${message}`);
+    }
+};
+
+
 export {
     getMinState,
     getAvgState,
@@ -61,10 +67,10 @@ export {
     getTime,
     compress,
     decompress,
-    logWarning,
     isString,
     isNumber,
     isInt,
     isUndef,
     isBool,
+    log
 };

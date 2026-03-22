@@ -1,6 +1,6 @@
 import localForage from "localforage/src/localforage";
 import {CARD_NAME, CARD_VERSION} from "./const.js";
-import {decompress, logWarning} from "./utils";
+import {decompress, log} from "./utils";
 
 localForage.config({
     name: CARD_NAME,
@@ -16,7 +16,7 @@ localForage.iterate((data, key) => {
         localForage.removeItem(key);
     }
 }).catch((err) => {
-    logWarning("Cache purging has errored: ", err);
+    log.warn("Cache purging has errored: ", err);
 });
 
 console.info(
