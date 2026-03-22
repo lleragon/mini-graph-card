@@ -38,8 +38,9 @@ class ExtremaGraphCard extends LitElement {
     
     static get properties() {
         return {
+            id: String,     //For some reason (??), if we remove this property home assistant cannot access setConfig()
             tooltip: {attribute: false},
-            triggerLitUpdate: {attribute: false},   //Helper to trigger a lit element update
+            triggerLitUpdate: {attribute: false}, ///Helper to trigger a lit element update
         };
     }
     

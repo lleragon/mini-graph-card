@@ -58,7 +58,7 @@ function buildConfig(rawConfig) {
     //Generate cache key
     if (conf.cache) {
         let hash = SparkMD5.hash(JSON.stringify(conf)); //Hash configuration to identify cache objects
-        conf.cache_key = `${this.entity.entity_id}_${hash}`;
+        conf.cache_key = `${conf.entity}_${hash}`;
         if (!conf.cache_compress) conf.cache_key = `${conf.cache_key}_raw`;
     }
     
