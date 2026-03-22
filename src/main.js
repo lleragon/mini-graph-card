@@ -21,6 +21,8 @@ class ExtremaGraphCard extends LitElement {
         super();
         this.id = Math.random().toString(36).substring(2, 12);
         this.config = {};
+        this.Graph = undefined;
+        this.color = undefined;
         this.boundary_min = 0;
         this.boundary_max = 0;
         this.entity = undefined;
@@ -141,17 +143,11 @@ class ExtremaGraphCard extends LitElement {
     }
     
     render() {
-        //TODO check properly update detection on immuntabel properties https://lit.dev/docs/components/properties/#mutating-properties
         console.debug('rendering');
-        if (!this.config) {
-            return this.renderWarnings(`Card configuration not available.`);
-        }
-        if (!this.entity) {
-            return this.renderWarnings(`Entity not available: ${this.config.entity}`);
-        }
-        if (!this._hass) {
-            return this.renderWarnings(`Internal hass object not available: ${this.config.entity}`);
-        }
+        
+        if (!this.config) return this.renderWarnings(`Card configuration not available.`);
+        if (!this.entity) return this.renderWarnings(`Entity not available: ${this.config.entity}`);
+        if (!this._hass) return this.renderWarnings(`Internal hass object not available: ${this.config.entity}`);
         
         return html`
             <ha-card
