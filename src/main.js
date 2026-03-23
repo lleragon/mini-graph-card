@@ -135,7 +135,8 @@ class ExtremaGraphCard extends LitElement {
         
         if (!this.config) return this.renderWarnings(`Card configuration not available.`);
         if (!this.entity) return this.renderWarnings(`Entity not available: ${this.config.entity}`);
-        if (!this._hass) return this.renderWarnings(`Internal hass object not available: ${this.config.entity}`);
+        if (!this._hass) return this.renderWarnings(`Internal hass object not available.`);
+        if (!this.Graph._history) return this.renderLoadingSpinner();   //todo test design
         
         return html`
             <ha-card
@@ -149,10 +150,12 @@ class ExtremaGraphCard extends LitElement {
                     style="font-size: ${this.config.font_size}px;"
                     @click=${(e) => this.handlePopup(e, this.config.tap_action.entity || this.entity)}
             >
+                ${this.renderGraph()}
+                <div class="newflex">
                 ${this.renderHeader()}
                 ${this.renderState()}
-                ${this.renderGraph()}
                 ${this.renderInfo()}
+                </div>
             </ha-card>`;
     }
     
@@ -162,6 +165,15 @@ class ExtremaGraphCard extends LitElement {
                 <div>extrema-graph-card</div>
                 <div>${message}</div>
             </hui-warning>`;
+    }
+    
+    renderLoadingSpinner() {
+        return html`
+            <ha-card>
+                ${this.renderHeader()}
+                <ha-spinner aria-label="Loading" size="small">
+                </ha-spinner>
+            </ha-card>`;
     }
     
     renderHeader() {
@@ -254,25 +266,13 @@ class ExtremaGraphCard extends LitElement {
     }
     
     renderGraph() {
-        let content;
-        
         if (this.config.graph_type === 'none') return "";
         
-        if ((this.entity && (this.Graph._history !== undefined))) {
-            content = html`
-                <div class="graph__container">
-                    ${this.renderLabels()}
-                    <div class="graph__container__svg">
-                        ${this.renderSvg()}
-                    </div>
-                </div> `;
-        } else {
-            content = html`
-                <ha-spinner aria-label="Loading" size="small"></ha-spinner>`;
-        }
-        
         return html`
-            <div class="graph">${content}</div>`
+            <div class="graph">
+                ${this.renderLabels()}
+                ${this.renderSvg()}
+            </div>`
     }
     
     renderSvgFill() {
@@ -401,9 +401,9 @@ class ExtremaGraphCard extends LitElement {
     
     renderSvg() {
         const {height} = this.config;
-        
+        //todo preserveAspectRatio='none'
         return svg`
-            <svg preserveAspectRatio='none' width='100%' height='${height}px' viewBox='0 0 500 ${height}'
+            <svg  width='100%' height='${height}px' viewBox='0 0 500 ${height}'
                 @click=${(e) => e.stopPropagation()}>
                 <g>
                   <defs>
@@ -771,6 +771,23 @@ class ExtremaGraphCard extends LitElement {
     
     getCardSize() {
         return 3;
+    }
+    
+    /*
+    A cell of the grid is defined with the following dimension:
+        width: width of the section divided by 12 (approximately 30px)
+        height: 56px
+        gap between cells: 8px
+     */
+    getGridOptions() {
+        return {
+            rows: 2,
+            min_rows: 2,
+            max_rows: 10,
+            columns: 12,
+            min_columns: 2,
+            max_columns: undefined
+        };
     }
 }
 

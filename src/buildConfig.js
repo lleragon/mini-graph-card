@@ -18,7 +18,7 @@ function buildConfig(rawConfig) {
     //Search for unknown configuration options
     for (let key of Object.keys(rawConfig)) {
         if (key === "type" || key === "show") continue;
-        if (!(key in DEFAULT_CONF)) throw new Error(`Unknown configuration option: ${key}`);
+        if (!(key in DEFAULT_CONF) && key !== "grid_options") throw new Error(`Unknown configuration option: ${key}`);
     }
     for (let key of Object.keys(rawConfig.show)) {
         if (!(key in DEFAULT_CONF_SHOW)) throw new Error(`Unknown configuration key: show.${key}`);

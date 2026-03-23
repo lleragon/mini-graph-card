@@ -1,32 +1,37 @@
 import {css} from "lit-element";
 
 const style = css`
-    :host {
+    ha-card {
+        overflow: hidden;
+        height: 100%; //Important to fit into HA grid
+        width: 100%; //Important to fit into HA grid
+    }
+    
+    .graph {
+        position: absolute;
+        top: 0;
+        left: 0;
+        cursor: default;
+    }
+    
+    .newflex {
         display: flex;
         flex-direction: column;
+        position: absolute;
+        top:0;
+        left:0;
     }
+    
+    
+    //ha-card > div {
+    //    padding: 0px 16px 16px 16px;
+    //}
 
-    ha-card {
-        flex-direction: column;
-        flex: 1;
-        padding: 16px 0 0 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    ha-card > div {
-        padding: 0px 16px 16px 16px;
-    }
-
-    ha-card > div:last-child {
-        padding-bottom: 0;
-    }
-
-    ha-card .graph {
-        padding: 0;
-        order: 10;
-    }
-
+    //ha-card > div:last-child {
+    //    padding-bottom: 0;
+    //}
+    
+    
     ha-card[points] .line--points,
     ha-card[labels] .graph__labels.--primary {
         opacity: 0;
@@ -60,12 +65,14 @@ const style = css`
     }
 
     ha-spinner {
-        margin: 4px auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     .flex {
         display: flex;
-        display: -webkit-flex;
         min-width: 0;
     }
 
@@ -199,27 +206,7 @@ const style = css`
         left: initial;
         right: 0;
     }
-
-    .graph {
-        align-self: flex-end;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        margin-top: auto;
-        width: 100%;
-    }
-
-    .graph__container {
-        display: flex;
-        flex-direction: row;
-        position: relative;
-    }
-
-    .graph__container__svg {
-        cursor: default;
-        flex: 1;
-    }
-
+    
     svg {
         overflow: hidden;
         display: block;
@@ -344,11 +331,11 @@ const style = css`
         opacity: .75;
     }
 
-    .ellipsis {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+    //.ellipsis {
+    //    overflow: hidden;
+    //    text-overflow: ellipsis;
+    //    white-space: nowrap;
+    //}
 
     @keyframes fade {
         0% {
